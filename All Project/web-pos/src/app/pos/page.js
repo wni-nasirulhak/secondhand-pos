@@ -14,8 +14,13 @@ import {
   Plus,
   Printer,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  ChevronDown,
+  Filter,
+  Tag as TagIcon,
+  Package
 } from 'lucide-react';
+import Pagination from '@/components/Pagination';
 
 // Helper for image URLs
 function thumbUrl(src, w = 300) {
@@ -60,6 +65,10 @@ export default function PosPage() {
   const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [discountAmount, setDiscountAmount] = useState(0);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [filterBrand, setFilterBrand] = useState('All');
+
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [lastSaleData, setLastSaleData] = useState(null);
@@ -86,15 +95,33 @@ export default function PosPage() {
 
   const availableItems = useMemo(() => inventory.filter(i => i.status === 'Available'), [inventory]);
   const categories = ['All', ...new Set(availableItems.map(i => i.Category_Name).filter(Boolean))];
+  const brands = ['All', ...new Set(availableItems.map(i => i.brand).filter(Boolean))];
   
   const filteredItems = useMemo(() => availableItems.filter(i => {
     const matchSearch = String(i.item_name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
                         String(i.barcode_id || '').toLowerCase().includes(searchQuery.toLowerCase());
-    return matchSearch && (selectedCategory === 'All' || i.Category_Name === selectedCategory);
-  }), [availableItems, searchQuery, selectedCategory]);
+    const matchCategory = selectedCategory === 'All' || i.Category_Name === selectedCategory;
+    const matchBrand = filterBrand === 'All' || i.brand === filterBrand;
+    return matchSearch && matchCategory && matchBrand;
+  }), [availableItems, searchQuery, selectedCategory, filterBrand]);
+
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredItems.slice(start, start + itemsPerPage);
+  }, [filteredItems, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, filterBrand]);
 
   const addToCart = (item) => {
-    if (cart.find(c => c.barcode_id === item.barcode_id)) return;
+    if (cart.find(c => c.barcode_id === item.barcode_id)) {
+      setCart(cart.filter(c => c.barcode_id !== item.barcode_id));
+      return;
+    }
     setCart([...cart, item]);
   };
 
@@ -172,35 +199,69 @@ export default function PosPage() {
     <div className="flex flex-col lg:flex-row gap-6 min-h-[calc(100vh-140px)] lg:h-[calc(100vh-120px)] overflow-hidden items-stretch">
       {/* Product Grid Section */}
       <div className="flex-1 flex flex-col gap-4 min-w-0 h-full overflow-hidden">
-        <div className="flex gap-4 items-center">
-            <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+        <div className="flex flex-wrap gap-2 items-center bg-white p-3 rounded-[24px] border border-slate-100 shadow-sm">
+            <div className="relative flex-1 min-w-[200px] group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4 transition-colors group-focus-within:text-indigo-500" />
                 <input 
                     type="text" 
                     placeholder="ค้นหาสินค้าหรือบาร์โค้ด..." 
-                    className="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none bg-white shadow-sm transition-all"
+                    className="w-full pl-11 pr-4 py-2.5 rounded-xl border-none outline-none bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all font-bold text-sm text-slate-700"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                 />
             </div>
-            <select 
-                className="bg-white px-4 py-3 rounded-2xl border border-slate-200 outline-none shadow-sm focus:ring-2 focus:ring-indigo-400"
-                value={selectedCategory}
-                onChange={e => setSelectedCategory(e.target.value)}
-            >
-                {categories.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+            
+            <div className="relative min-w-[120px]">
+              <select 
+                  className="w-full appearance-none bg-slate-50 px-4 py-2.5 rounded-xl border-none outline-none font-bold text-xs text-slate-600 focus:bg-white focus:ring-2 focus:ring-indigo-100 cursor-pointer"
+                  value={selectedCategory}
+                  onChange={e => setSelectedCategory(e.target.value)}
+              >
+                  {categories.map(c => <option key={c} value={c}>{c === 'All' ? 'ทุกหมวดหมู่' : c}</option>)}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
+
+            <div className="relative min-w-[120px]">
+              <select 
+                  className="w-full appearance-none bg-slate-50 px-4 py-2.5 rounded-xl border-none outline-none font-bold text-xs text-slate-600 focus:bg-white focus:ring-2 focus:ring-indigo-100 cursor-pointer"
+                  value={filterBrand}
+                  onChange={e => setFilterBrand(e.target.value)}
+              >
+                  {brands.map(b => <option key={b} value={b}>{b === 'All' ? 'ทุกแบรนด์' : b}</option>)}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
         </div>
 
-        <div className="product-grid overflow-y-auto pb-20 pr-1">
-            {filteredItems.map(item => (
-              <ProductCard 
-                key={item.barcode_id} 
-                item={item} 
-                inCart={cart.some(c => c.barcode_id === item.barcode_id)}
-                onAdd={() => addToCart(item)}
-              />
-            ))}
+        <div className="flex-1 overflow-y-auto pr-1">
+            {paginatedItems.length === 0 ? (
+              <div className="h-64 flex flex-col items-center justify-center text-slate-300 gap-4">
+                <Package className="w-16 h-16 opacity-20" />
+                <p className="font-bold text-sm">ไม่พบสินค้าที่คุณต้องการ</p>
+              </div>
+            ) : (
+              <>
+                <div className="product-grid mb-6">
+                    {paginatedItems.map(item => (
+                      <ProductCard 
+                        key={item.barcode_id} 
+                        item={item} 
+                        inCart={cart.some(c => c.barcode_id === item.barcode_id)}
+                        onAdd={() => addToCart(item)}
+                      />
+                    ))}
+                </div>
+                <Pagination 
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  itemsPerPage={itemsPerPage}
+                  onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+                  totalItems={filteredItems.length}
+                />
+              </>
+            )}
         </div>
       </div>
 

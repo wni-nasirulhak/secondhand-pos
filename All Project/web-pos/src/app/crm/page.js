@@ -3,8 +3,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { 
   Users, Search, Edit3, MapPin, Phone, Star, X, 
   Trash2, History, ChevronRight, TrendingUp, ShoppingBag, 
-  Calendar, CreditCard, Loader2, UserPlus, Filter
+  Calendar, CreditCard, Loader2, Filter, ChevronLeft, ChevronDown
 } from 'lucide-react';
+import Pagination from '@/components/Pagination';
 
 export default function CrmPage() {
   const [customers, setCustomers] = useState([]);
@@ -18,6 +19,11 @@ export default function CrmPage() {
   const [editName, setEditName] = useState('');
   const [editAddress, setEditAddress] = useState('');
   const [saveLoading, setSaveLoading] = useState(false);
+
+  // Pagination & Limits
+  const [currentPage, setCurrentPage] = useState(1);
+  const [customersPerPage, setCustomersPerPage] = useState(10);
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
@@ -77,6 +83,18 @@ export default function CrmPage() {
     });
   }, [customers, searchQuery]);
 
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const paginatedCustomers = useMemo(() => {
+    const start = (currentPage - 1) * customersPerPage;
+    return filteredCustomers.slice(start, start + customersPerPage);
+  }, [filteredCustomers, currentPage, customersPerPage]);
+
+  const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
+
   const stats = useMemo(() => {
     const totalSpent = customers.reduce((sum, c) => sum + (parseFloat(c.Total_Spent || c.Total_Purchase || 0)), 0);
     const avgSpent = totalSpent / (customers.length || 1);
@@ -116,6 +134,7 @@ export default function CrmPage() {
 
   const selectCustomer = (c) => {
     setSelectedCustomer(c);
+    setShowAllHistory(false); // Reset history limit when switching customer
     fetchHistory(c.Phone || c.Phone_Number);
   };
 
@@ -131,11 +150,11 @@ export default function CrmPage() {
       {/* ── HEADER & QUICK STATS ────────────────────────────── */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
-          <h1 className="text-4xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-            <Users className="w-10 h-10 text-indigo-600" />
+          <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight flex items-center gap-2 md:gap-3">
+            <Users className="w-8 h-8 md:w-10 md:h-10 text-indigo-600" />
             CRM <span className="text-slate-300">Analytics</span>
           </h1>
-          <p className="text-slate-500 font-bold mt-2 ml-1">ระบบวิเคราะห์และพฤติกรรมลูกค้าอัจฉริยะ</p>
+          <p className="text-xs md:text-sm text-slate-500 font-bold mt-1 md:mt-2 ml-1">ระบบวิเคราะห์และพฤติกรรมลูกค้าอัจฉริยะ</p>
         </div>
         
         <div className="flex flex-wrap gap-3">
@@ -145,13 +164,13 @@ export default function CrmPage() {
             { label: 'Avg Sale', value: `฿${stats.avgSpent.toFixed(0)}`, icon: CreditCard, color: 'bg-emerald-50 text-emerald-600' },
             { label: 'Total Base', value: stats.totalCustomers, icon: Users, color: 'bg-slate-50 text-slate-600' },
           ].map((s, i) => (
-            <div key={i} className="bg-white p-4 rounded-[28px] border border-slate-100 shadow-sm flex items-center gap-4 min-w-[180px]">
-              <div className={`p-3 rounded-2xl ${s.color}`}>
-                <s.icon className="w-5 h-5" />
+            <div key={i} className="bg-white p-3 md:p-4 rounded-[24px] md:rounded-[28px] border border-slate-100 shadow-sm flex items-center gap-3 md:gap-4 flex-1 min-w-[140px]">
+              <div className={`p-2.5 md:p-3 rounded-xl md:rounded-2xl ${s.color}`}>
+                <s.icon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
               <div>
-                <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">{s.label}</div>
-                <div className="text-lg font-black text-slate-800">{s.value}</div>
+                <div className="text-[8px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">{s.label}</div>
+                <div className="text-base md:text-lg font-black text-slate-800">{s.value}</div>
               </div>
             </div>
           ))}
@@ -181,33 +200,33 @@ export default function CrmPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-100">
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Member Info</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Status</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">LTV (ยอดรวม)</th>
-                  <th className="px-8 py-6 text-right"></th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] md:tracking-[0.2em]">Member Info</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] md:tracking-[0.2em] text-center hidden md:table-cell">Status</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] md:tracking-[0.2em] text-right">LTV (ยอดรวม)</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-right"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filteredCustomers.map(cust => (
+                {paginatedCustomers.map(cust => (
                   <tr 
                     key={cust.Phone || cust.Phone_Number} 
                     onClick={() => selectCustomer(cust)}
                     className={`group cursor-pointer transition-all ${selectedCustomer?.Phone === cust.Phone ? 'bg-indigo-50/50' : 'hover:bg-slate-50/30'}`}
                   >
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xl border border-slate-200 uppercase">
+                    <td className="px-4 md:px-8 py-4 md:py-6">
+                      <div className="flex items-center gap-3 md:gap-4">
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-base md:text-xl border border-slate-200 uppercase shrink-0">
                           {(cust.Name || 'C')[0]}
                         </div>
-                        <div className="flex flex-col">
-                          <span className="font-black text-slate-800 text-lg leading-tight">{cust.Name || cust.Customer_Name}</span>
-                          <span className="text-xs text-slate-400 font-bold flex items-center gap-1.5 mt-1">
-                            <Phone className="w-3 h-3 text-indigo-400" /> {cust.Phone || cust.Phone_Number}
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-black text-slate-800 text-sm md:text-lg leading-tight truncate">{cust.Name || cust.Customer_Name}</span>
+                          <span className="text-[10px] md:text-xs text-slate-400 font-bold flex items-center gap-1.5 mt-0.5 md:mt-1">
+                            <Phone className="w-2.5 h-2.5 md:w-3 md:h-3 text-indigo-400" /> {cust.Phone || cust.Phone_Number}
                           </span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6 text-center">
+                    <td className="px-4 md:px-8 py-4 md:py-6 text-center hidden md:table-cell">
                       {parseFloat(cust.Total_Spent || 0) > 5000 ? (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-black uppercase tracking-wider">
                           <Star className="w-3 h-3 fill-amber-500" /> VIP
@@ -218,31 +237,39 @@ export default function CrmPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-8 py-6 text-right">
-                      <div className="text-lg font-black text-slate-800">฿{parseFloat(cust.Total_Spent || 0).toLocaleString()}</div>
-                      <div className="text-[10px] text-emerald-500 font-black uppercase">{parseInt(cust.Points || 0)} pts earned</div>
+                    <td className="px-4 md:px-8 py-4 md:py-6 text-right">
+                      <div className="text-sm md:text-lg font-black text-slate-800">฿{parseFloat(cust.Total_Spent || 0).toLocaleString()}</div>
+                      <div className="text-[8px] md:text-[10px] text-emerald-500 font-black uppercase">{parseInt(cust.Points || 0)} pts</div>
                     </td>
-                    <td className="px-8 py-6 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-4 md:px-8 py-4 md:py-6 text-right">
+                      <div className="flex items-center justify-end gap-1.5 md:gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleEdit(cust); }}
-                          className="p-2.5 bg-white text-slate-400 hover:text-indigo-600 rounded-xl shadow-sm border border-slate-100 transition-all"
+                          className="p-2 md:p-2.5 bg-white text-slate-400 hover:text-indigo-600 rounded-lg md:rounded-xl shadow-sm border border-slate-100 transition-all"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit3 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                         </button>
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleDeleteCustomer(cust.Phone || cust.Phone_Number); }}
-                          className="p-2.5 bg-white text-slate-400 hover:text-rose-600 rounded-xl shadow-sm border border-slate-100 transition-all"
+                          className="p-2 md:p-2.5 bg-white text-slate-400 hover:text-rose-600 rounded-lg md:rounded-xl shadow-sm border border-slate-100 transition-all"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                         </button>
-                        <ChevronRight className="w-5 h-5 text-slate-200" />
                       </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={customersPerPage}
+              onItemsPerPageChange={(val) => { setCustomersPerPage(val); setCurrentPage(1); }}
+              totalItems={filteredCustomers.length}
+            />
           </div>
         </div>
 
@@ -291,49 +318,58 @@ export default function CrmPage() {
                     ) : (!Array.isArray(purchaseHistory) || purchaseHistory.length === 0) ? (
                       <div className="text-center py-10 text-slate-300 text-xs font-bold">ไม่พบประวัติการสั่งซื้อ</div>
                     ) : (
-                      purchaseHistory.map(sale => {
+                      (showAllHistory ? purchaseHistory : purchaseHistory.slice(0, 3)).map(sale => {
                         const items = (sale.items_detail || '').split(';;').filter(Boolean).map(it => {
                           const [name, barcode] = it.split('||');
                           return { name, barcode };
                         });
 
                         return (
-                          <div key={sale.id} className="p-4 bg-slate-50/50 border border-slate-100 rounded-2xl group hover:bg-white hover:shadow-md transition-all">
+                          <div key={sale.id} className="p-3 md:p-4 bg-slate-50/50 border border-slate-100 rounded-2xl group hover:bg-white hover:shadow-md transition-all">
                             <div className="flex justify-between items-start mb-2">
-                              <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-1 rounded-lg border border-slate-100">SALE-{sale.id}</span>
-                              <span className="text-lg font-black text-slate-800">฿{parseFloat(sale.total_amount).toLocaleString()}</span>
+                              <span className="text-[9px] font-bold text-slate-400 bg-white px-2 py-1 rounded-lg border border-slate-100">SALE-{sale.id}</span>
+                              <span className="text-base md:text-lg font-black text-slate-800">฿{parseFloat(sale.total_amount).toLocaleString()}</span>
                             </div>
                             
-                            <div className="flex items-center gap-3 text-[10px] font-bold text-slate-500 mb-3">
-                               <span className="flex items-center gap-1"><Calendar className="w-3 h-3"/> {new Date(sale.created_at).toLocaleDateString()}</span>
-                               <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                               <span className="flex items-center gap-1"><ShoppingBag className="w-3 h-3"/> {sale.total_items} items</span>
+                            <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 mb-3">
+                               <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-indigo-400"/> {new Date(sale.created_at).toLocaleDateString()}</span>
+                               <span className="w-0.5 h-0.5 bg-slate-200 rounded-full" />
+                               <span className="flex items-center gap-1"><ShoppingBag className="w-3 h-3 text-indigo-400"/> {sale.total_items} items</span>
                             </div>
 
                             {/* Item List */}
-                            <div className="space-y-2 border-t border-slate-100 pt-3">
+                            <div className="space-y-1.5 border-t border-slate-100/50 pt-2.5">
                               {items.map((it, idx) => (
-                                <div key={idx} className="flex justify-between items-center bg-white/50 p-2 rounded-xl border border-dotted border-slate-200">
-                                  <div className="flex flex-col">
-                                    <span className="text-[11px] font-black text-slate-700">{it.name}</span>
-                                    <span className="text-[9px] font-bold text-slate-400 font-mono">{it.barcode}</span>
+                                <div key={idx} className="flex justify-between items-center bg-white/50 p-1.5 md:p-2 rounded-xl border border-dotted border-slate-200">
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-[10px] font-black text-slate-700 truncate max-w-[100px] md:max-w-none">{it.name}</span>
+                                    <span className="text-[8px] font-bold text-slate-400 font-mono">#{it.barcode}</span>
                                   </div>
                                   <a 
                                     href={`/inventory?search=${it.barcode}`}
-                                    className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2.5 py-1.5 rounded-lg transition-colors"
+                                    className="text-[8px] md:text-[9px] font-black text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap"
                                   >
-                                    View Product
+                                    View
                                   </a>
                                 </div>
                               ))}
                             </div>
 
                             {sale.discount > 0 && (
-                              <div className="mt-3 text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-lg inline-block">Discount: -฿{sale.discount.toLocaleString()}</div>
+                              <div className="mt-2 text-[8px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-lg inline-block">Discount: -฿{sale.discount.toLocaleString()}</div>
                             )}
                           </div>
                         );
                       })
+                    )}
+                    
+                    {!historyLoading && purchaseHistory.length > 3 && (
+                      <button 
+                        onClick={() => setShowAllHistory(!showAllHistory)}
+                        className="w-full py-3 bg-slate-50 hover:bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-slate-100"
+                      >
+                        {showAllHistory ? 'Show Less' : `Show All History (+${purchaseHistory.length - 3})`}
+                      </button>
                     )}
                   </div>
                 </div>

@@ -3,8 +3,9 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Package, Search, Plus, X, CheckCircle2, Loader2,
   ArrowRight, ArrowLeft, RefreshCw, Trash2, Camera, Link as LinkIcon, ChevronDown,
-  ChevronLeft, ChevronRight, Tag
+  ChevronLeft, ChevronRight, Tag, Filter
 } from 'lucide-react';
+import Pagination from '@/components/Pagination';
 
 // ============================================================
 // LOOKUP DATA
@@ -146,6 +147,10 @@ export default function InventoryPage() {
   const [editingItem, setEditingItem] = useState(null);
   const [canSubmit, setCanSubmit] = useState(false);
   
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+  
   useEffect(() => {
     if (step === 4) {
       setCanSubmit(true); // No more delay
@@ -170,6 +175,11 @@ export default function InventoryPage() {
       setSearchQuery(search);
     }
   }, []);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterCat, filterBrand, filterStatus]);
 
   async function fetchData() {
     setLoading(true);
@@ -374,6 +384,13 @@ export default function InventoryPage() {
     }
   };
 
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredItems.slice(start, start + itemsPerPage);
+  }, [filteredItems, currentPage]);
+
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
   const totalValue = items.reduce((s, i) => s + parseFloat(i.selling_price || 0), 0);
   const availableCount = items.filter(i => i.status === 'Available').length;
   const pendingCount = items.filter(i => i.status === 'Pending Print').length;
@@ -398,20 +415,20 @@ export default function InventoryPage() {
         </button>
       </div>
 
-      <div className="stats-grid grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="stats-grid grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
           { icon: '📦', label: 'สินค้าทั้งหมด', value: items.length, color: 'text-slate-600' },
           { icon: '⏳', label: 'รอพิมพ์บาร์โค้ด', value: pendingCount, color: 'text-amber-500' },
           { icon: '✅', label: 'พร้อมขาย', value: availableCount, color: 'text-emerald-500' },
           { icon: '💰', label: 'มูลค่ารวมขาย', value: `฿${totalValue.toLocaleString()}`, color: 'text-indigo-600' },
         ].map((s, i) => (
-          <div key={i} className="bg-white rounded-[24px] p-5 border border-slate-100 shadow-sm flex items-center gap-4 transition-all hover:shadow-md">
-            <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl shadow-inner italic">
+          <div key={i} className="bg-white rounded-[20px] md:rounded-[24px] p-3 md:p-5 border border-slate-100 shadow-sm flex items-center gap-3 md:gap-4 transition-all hover:shadow-md">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-2xl shadow-inner italic">
               {s.icon}
             </div>
             <div>
-              <div className={`text-xl font-black ${s.color} leading-none mb-1`}>{s.value}</div>
-              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{s.label}</div>
+              <div className={`text-base md:text-xl font-black ${s.color} leading-none mb-0.5 md:mb-1`}>{s.value}</div>
+              <div className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-wider">{s.label}</div>
             </div>
           </div>
         ))}
@@ -496,8 +513,8 @@ export default function InventoryPage() {
           <p className="font-semibold">ยังไม่มีสินค้าในคลัง</p>
         </div>
       ) : (
-        <div className="product-grid">
-          {filteredItems.map(item => (
+        <div className="product-grid mb-8">
+          {paginatedItems.map(item => (
             <ProductGridItem 
               key={item.id} 
               item={item} 
@@ -508,6 +525,15 @@ export default function InventoryPage() {
           ))}
         </div>
       )}
+
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        itemsPerPage={itemsPerPage}
+        onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+        totalItems={filteredItems.length}
+      />
 
       {/* ── FLOATING ACTION BAR ─────────────────────────── */}
       {selectedIds.length > 0 && (
@@ -889,12 +915,12 @@ function ProductGridItem({ item, onEdit, isSelected, onToggle }) {
   return (
     <div 
       onClick={onToggle}
-      className={`group bg-white rounded-3xl border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 relative cursor-pointer ${
+      className={`group bg-white rounded-2xl md:rounded-3xl border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 relative cursor-pointer ${
         isSelected ? 'border-indigo-500 ring-4 ring-indigo-50 bg-indigo-50/10' : 'border-slate-100'
       }`}
     >
       {/* Checkbox badge */}
-      <div className={`absolute top-3 left-3 z-10 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+      <div className={`absolute top-2 left-2 md:top-3 md:left-3 z-10 w-5 h-5 md:w-6 md:h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
         isSelected ? 'bg-indigo-600 border-indigo-600 shadow-lg' : 'bg-white/80 border-slate-200 opacity-0 group-hover:opacity-100'
       }`}>
         {isSelected && <CheckCircle2 className="w-4 h-4 text-white" />}
@@ -938,37 +964,37 @@ function ProductGridItem({ item, onEdit, isSelected, onToggle }) {
         </div>
       </div>
       
-      <div className="p-4">
-        <div className="flex items-center gap-1.5 mb-2">
-          <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-400 uppercase tracking-tighter">#{item.barcode_id}</span>
+      <div className="p-2.5 md:p-4">
+        <div className="flex items-center gap-1 mb-1.5 md:mb-2">
+          <span className="text-[8px] md:text-[10px] font-black px-1 md:px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-400 uppercase tracking-tighter">#{item.barcode_id}</span>
           <div className="h-1 w-1 bg-slate-200 rounded-full" />
-          <div className="text-[10px] text-indigo-500 font-black uppercase tracking-widest truncate">{item.brand || 'NO BRAND'}</div>
+          <div className="text-[8px] md:text-[10px] text-indigo-500 font-black uppercase tracking-widest truncate">{item.brand || 'NO BRAND'}</div>
         </div>
 
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <h3 className="text-sm font-black text-slate-800 line-clamp-2 leading-snug h-[2.8em]">{item.item_name}</h3>
+        <div className="flex items-start justify-between gap-2 mb-3 md:mb-4">
+          <h3 className="text-xs md:text-sm font-black text-slate-800 line-clamp-2 leading-snug h-[2.8em]">{item.item_name}</h3>
           <button 
             onClick={(e) => { e.stopPropagation(); onEdit(item); }}
-            className="shrink-0 p-2 bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all border border-slate-100"
+            className="shrink-0 p-1.5 md:p-2 bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 rounded-lg md:rounded-xl transition-all border border-slate-100"
           >
-            <Tag className="w-4 h-4" />
+            <Tag className="w-3 h-3 md:w-4 md:h-4" />
           </button>
         </div>
 
-        <div className="flex items-center gap-1.5 mb-4 overflow-hidden">
-          {item.size && <span className="text-[10px] font-bold bg-indigo-50/50 text-indigo-600 px-2 py-1 rounded-lg border border-indigo-100/50">S:{item.size}</span>}
-          {item.chest_width && <span className="text-[10px] font-bold bg-slate-50 text-slate-500 px-2 py-1 rounded-lg border border-slate-100">อก:{item.chest_width}"</span>}
-          {item.size_eu && <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-lg border border-slate-200">EU {item.size_eu}</span>}
+        <div className="flex items-center gap-1 mb-3 md:mb-4 overflow-hidden">
+          {item.size && <span className="text-[8px] md:text-[10px] font-bold bg-indigo-50/50 text-indigo-600 px-1.5 py-0.5 rounded-md md:rounded-lg border border-indigo-100/50">S:{item.size}</span>}
+          {item.chest_width && <span className="text-[8px] md:text-[10px] font-bold bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded-md md:rounded-lg border border-slate-100">อก:{item.chest_width}"</span>}
+          {item.size_eu && <span className="text-[8px] md:text-[10px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md md:rounded-lg border border-slate-200">EU {item.size_eu}</span>}
         </div>
 
-        <div className="flex items-end justify-between pt-3 border-t border-slate-50">
+        <div className="flex items-end justify-between pt-2 md:pt-3 border-t border-slate-50">
           <div>
-            <div className="text-[9px] text-slate-300 font-bold uppercase tracking-wider mb-0.5">Selling Price</div>
-            <div className="text-xl font-black text-slate-900 leading-none">
-              <span className="text-sm mr-0.5">฿</span>{parseFloat(item.selling_price || 0).toLocaleString()}
+            <div className="text-[8px] md:text-[9px] text-slate-300 font-bold uppercase tracking-wider mb-0.5">Selling Price</div>
+            <div className="text-base md:text-xl font-black text-slate-900 leading-none">
+              <span className="text-xs md:text-sm mr-0.5">฿</span>{parseFloat(item.selling_price || 0).toLocaleString()}
             </div>
           </div>
-          <div className="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-lg">{item.Category_Name}</div>
+          <div className="text-[8px] md:text-[10px] font-bold text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded-md md:rounded-lg">{item.Category_Name}</div>
         </div>
       </div>
     </div>

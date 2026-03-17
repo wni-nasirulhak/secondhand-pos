@@ -12,12 +12,12 @@ import {
   BarChart3,
   PieChart as PieIcon,
   Activity,
-  Calendar,
-  Filter,
+  Calendar, CreditCard, Loader2, UserPlus, Filter,
   ChevronDown,
   Tag as TagIcon,
   ShoppingBag
 } from 'lucide-react';
+import Pagination from '@/components/Pagination';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell, PieChart, Pie, Legend
@@ -29,6 +29,8 @@ export default function DashboardPage() {
   const [endDate, setEndDate] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [brandId, setBrandId] = useState('');
+  const [salesLimit, setSalesLimit] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Data
   const [dashboardData, setDashboardData] = useState(null);
@@ -81,6 +83,8 @@ export default function DashboardPage() {
         if (endDate) params.append('endDate', endDate);
         if (categoryId) params.append('categoryId', categoryId);
         if (brandId) params.append('brand', brandId);
+        params.append('limit', salesLimit);
+        params.append('page', currentPage);
 
         const [statsRes, salesRes] = await Promise.all([
           fetch(`/api/dashboard/stats?${params.toString()}`),
@@ -98,7 +102,7 @@ export default function DashboardPage() {
       }
     }
     fetchData();
-  }, [startDate, endDate, categoryId, brandId]);
+  }, [startDate, endDate, categoryId, brandId, salesLimit, currentPage]);
 
   const stats = useMemo(() => {
     if (!dashboardData) return null;
@@ -111,7 +115,9 @@ export default function DashboardPage() {
       name: d.date.split('-').slice(1).join('/'),
       total: d.total
     }));
-  }, [dashboardData]);
+  }, [dashboardData, salesLimit, currentPage]);
+
+  const totalPages = Math.ceil((dashboardData?.recentSales?.length || 0) / salesLimit);
 
   const categoryBarData = useMemo(() => {
     if (!dashboardData) return [];
@@ -129,12 +135,12 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-16 px-4">
+    <div className="space-y-4 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-16 px-3 md:px-6">
       {/* Header & Filters Section */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Business Analytics</h1>
-          <p className="text-slate-500 font-medium mt-1">สรุปข้อมูลเชิงลึกและการบริหารจัดการยอดขาย</p>
+          <h1 className="text-2xl md:text-4xl font-bold text-slate-900 tracking-tight">Business Analytics</h1>
+          <p className="text-slate-500 font-medium mt-1 text-xs md:text-sm">สรุปข้อมูลเชิงลึกและการบริหารจัดการยอดขาย</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3 bg-white/80 backdrop-blur-md p-3 rounded-3xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
@@ -201,7 +207,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard 
           title="Revenue" 
           value={`฿${(stats?.totalRevenue || 0).toLocaleString()}`} 
@@ -242,7 +248,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Sales Trend Chart */}
-        <div className="lg:col-span-2 bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm hover:shadow-md transition-shadow">
+        <div className="lg:col-span-2 bg-white rounded-[24px] md:rounded-[32px] border border-slate-200 p-4 md:p-8 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-xl font-bold text-slate-900">Sales Trends</h2>
@@ -253,7 +259,7 @@ export default function DashboardPage() {
                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Real-time Data</span>
             </div>
           </div>
-          <div className="h-[340px] w-full">
+          <div className="h-[220px] md:h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
@@ -298,7 +304,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Brand Performance */}
-        <div className="bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-[24px] md:rounded-[32px] border border-slate-200 p-4 md:p-8 shadow-sm hover:shadow-md transition-shadow">
           <div className="mb-8">
             <h2 className="text-xl font-bold text-slate-900">Top Brands</h2>
             <p className="text-slate-400 text-sm">แบรนด์ที่มียอดขายสูงสุด</p>
@@ -350,13 +356,13 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cost vs Profit Breakdown */}
-        <div className="bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm">
+        <div className="bg-white rounded-[24px] md:rounded-[32px] border border-slate-200 p-4 md:p-8 shadow-sm">
           <div className="mb-8">
             <h2 className="text-xl font-bold text-slate-900">Finance breakdown</h2>
             <p className="text-slate-400 text-sm">เปรียบเทียบต้นทุนและกำไรตามหมวดหมู่</p>
           </div>
           
-          <div className="h-[380px] w-full">
+          <div className="h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={categoryBarData} layout="vertical" margin={{ left: -10, right: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
@@ -387,8 +393,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Transactions Table */}
-        <div className="lg:col-span-2 bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-8 border-b border-slate-100 flex justify-between items-center">
+        <div className="lg:col-span-2 bg-white rounded-[24px] md:rounded-[32px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-4 md:p-8 border-b border-slate-100 flex justify-between items-center">
             <div className="flex items-center gap-4">
                <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
                  <Clock className="w-6 h-6 text-indigo-600" />
@@ -407,30 +413,30 @@ export default function DashboardPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50/50 text-[10px] uppercase tracking-wider text-slate-400 font-bold border-b border-slate-100">
-                  <th className="pl-8 py-5">Order ID</th>
-                  <th className="px-6 py-5">Customer & Product</th>
-                  <th className="px-6 py-5 text-center">Amount</th>
-                  <th className="pr-8 py-5 text-right">Net Profit</th>
+                  <th className="pl-4 md:pl-8 py-3 md:py-5">Order ID</th>
+                  <th className="px-4 py-3 md:py-5">Customer & Product</th>
+                  <th className="px-4 py-3 md:py-5 text-center">Amount</th>
+                  <th className="pr-4 md:pr-8 py-3 md:py-5 text-right hidden md:table-cell">Net Profit</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {sales.slice(0, 8).map((item) => (
+                {sales.map((item) => (
                   <tr key={item.ID} className="group hover:bg-slate-50/60 transition-colors">
-                    <td className="pl-8 py-5">
-                      <div className="text-sm font-bold text-slate-800">#{item.ID}</div>
-                      <div className="text-[10px] text-slate-400 font-semibold mt-1">
+                    <td className="pl-4 md:pl-8 py-3 md:py-5">
+                      <div className="text-xs md:text-sm font-bold text-slate-800">#{item.ID}</div>
+                      <div className="text-[9px] md:text-[10px] text-slate-400 font-semibold mt-0.5">
                         {new Date(item.Timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </td>
-                    <td className="px-6 py-5">
-                      <div className="text-sm font-semibold text-slate-700">{item.Customer_Name || 'General Customer'}</div>
-                      <div className="text-[10px] text-slate-400 font-medium truncate max-w-[200px] mt-1">{item.Product_Name}</div>
+                    <td className="px-4 py-3 md:py-5">
+                      <div className="text-xs md:text-sm font-semibold text-slate-700">{item.Customer_Name || 'General Customer'}</div>
+                      <div className="text-[9px] md:text-[10px] text-slate-400 font-medium truncate max-w-[120px] md:max-w-[200px] mt-0.5">{item.Product_Name}</div>
                     </td>
-                    <td className="px-6 py-5 text-center">
-                      <div className="text-sm font-bold text-slate-900 tracking-tight">฿{item.Price.toLocaleString()}</div>
+                    <td className="px-4 py-3 md:py-5 text-center">
+                      <div className="text-xs md:text-sm font-bold text-slate-900 tracking-tight">฿{item.Price.toLocaleString()}</div>
                     </td>
-                    <td className="pr-8 py-5 text-right">
-                      <div className="text-sm font-bold text-emerald-600 tracking-tight">+฿{item.Profit_Baht.toLocaleString()}</div>
+                    <td className="pr-4 md:pr-8 py-3 md:py-5 text-right hidden md:table-cell">
+                      <div className="text-xs md:text-sm font-bold text-emerald-600 tracking-tight">+฿{item.Profit_Baht.toLocaleString()}</div>
                       <div className="text-[9px] font-bold text-emerald-500/80 mt-1 uppercase">
                         {Math.round(item.Profit_Percent)}% Profit
                       </div>
@@ -450,6 +456,16 @@ export default function DashboardPage() {
               </tbody>
             </table>
           </div>
+          <div className="mt-auto">
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={salesLimit}
+              onItemsPerPageChange={(val) => { setSalesLimit(val); setCurrentPage(1); }}
+              totalItems={dashboardData?.recentSales?.length || 0}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -467,7 +483,7 @@ function FilterItem({ icon: Icon, children }) {
 
 function StatCard({ title, value, icon: Icon, subtitle, color, lightColor, textColor }) {
   return (
-    <div className="bg-white rounded-[32px] p-8 border border-slate-200 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 group relative overflow-hidden">
+    <div className="bg-white rounded-[24px] md:rounded-[32px] p-4 md:p-8 border border-slate-200 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 group relative overflow-hidden">
       <div className="relative z-10">
         <div className="flex justify-between items-start mb-6">
           <div className={`${lightColor} ${textColor} p-4 rounded-3xl group-hover:scale-110 transition-transform`}>
@@ -478,8 +494,8 @@ function StatCard({ title, value, icon: Icon, subtitle, color, lightColor, textC
           </div>
         </div>
         <div>
-          <p className="text-3xl font-bold text-slate-900 tracking-tight leading-none mb-2">{value}</p>
-          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{subtitle}</p>
+          <p className="text-xl md:text-3xl font-bold text-slate-900 tracking-tight leading-none mb-1 md:mb-2">{value}</p>
+          <p className="text-[9px] md:text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{subtitle}</p>
         </div>
       </div>
       <div className={`absolute right-[-10%] bottom-[-10%] w-24 h-24 ${color} opacity-0 group-hover:opacity-[0.03] blur-3xl rounded-full transition-opacity`}></div>
