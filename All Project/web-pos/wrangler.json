@@ -1,0 +1,13 @@
+{
+  "name": "thrift-shop-pos",
+  "pages_build_output_dir": ".vercel/output/static",
+  "compatibility_date": "2024-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "thrift-db",
+      "database_id": "thrift-db-id"
+    }
+  ]
+}
