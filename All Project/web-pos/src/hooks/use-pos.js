@@ -36,7 +36,7 @@ export function usePos() {
       const invData = await invRes.json();
       const custData = await custRes.json();
       setInventory(Array.isArray(invData) ? invData : []);
-      setCustomers(Array.isArray(custData) ? custData : []);
+      setCustomers(Array.isArray(custData.customers) ? custData.customers : []);
     } catch (err) {
       console.error('Fetch error:', err);
     } finally {

@@ -39,7 +39,7 @@ export default function InventoryPage() {
 
   const [selectedType, setSelectedType] = useState(null);
   const [form, setForm] = useState({
-    barcode_id: '', item_name: '', brand: '', condition: '9/10 Good',
+    barcode_id: '', item_name: '', brand: '', condition: '9/10 Good', status: 'Available',
     color: '', pattern: '', material: '', cost_price: '0', selling_price: '0', description: '',
     size: '', chest_width: '', waist_size: '', sleeve_length: '', shoulder_width: '', total_length: '',
     size_eu: '', size_us: '', size_uk: '', insole_cm: '',
@@ -106,7 +106,7 @@ export default function InventoryPage() {
       barcode_id: form.barcode_id, item_name: form.item_name, brand: form.brand,
       category_id: cat?.id || null, cost_price: parseFloat(form.cost_price) || 0,
       selling_price: parseFloat(form.selling_price) || 0,
-      status: editingItem?.status || 'Available', description: form.description, 
+      status: form.status || editingItem?.status || 'Available', description: form.description, 
       photos: uploadedImages,
       category_name: selectedType.id,
     };
@@ -133,6 +133,7 @@ export default function InventoryPage() {
       item_name: item.item_name || '',
       brand: item.brand || '',
       condition: item.clothing_condition || item.shoe_condition || '9/10 Good',
+      status: item.status || 'Available',
       color: item.clothing_color || item.shoe_color || '',
       pattern: '', 
       material: item.clothing_material || item.shoe_material || '',
@@ -154,7 +155,6 @@ export default function InventoryPage() {
     setStep(2);
     setShowWizard(true);
   }
-
   function closeWizard() {
     setShowWizard(false); 
     setStep(1); 
@@ -164,7 +164,7 @@ export default function InventoryPage() {
     setIsSubmitting(false);
     setUploadLoading(false);
     setCanSubmit(false);
-    setForm({ barcode_id: '', item_name: '', brand: '', condition: '9/10 Good', color: '', pattern: '', material: '', cost_price: '0', selling_price: '0', description: '', size: '', chest_width: '', waist_size: '', sleeve_length: '', shoulder_width: '', total_length: '', size_eu: '', size_us: '', size_uk: '', insole_cm: '' });
+    setForm({ barcode_id: '', item_name: '', brand: '', condition: '9/10 Good', status: 'Available', color: '', pattern: '', material: '', cost_price: '0', selling_price: '0', description: '', size: '', chest_width: '', waist_size: '', sleeve_length: '', shoulder_width: '', total_length: '', size_eu: '', size_us: '', size_uk: '', insole_cm: '' });
   }
 
   const setF = k => v => setForm(p => ({ ...p, [k]: v }));
@@ -242,6 +242,56 @@ export default function InventoryPage() {
           </select>
         </div>
       </div>
+
+      {selectedIds.length > 0 && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[80] bg-indigo-900/90 backdrop-blur-md text-white px-6 py-4 rounded-[32px] shadow-2xl flex items-center gap-6 animate-in slide-in-from-bottom-8">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Selected Items</span>
+            <span className="text-lg font-black">{selectedIds.length} รายการ</span>
+          </div>
+          <div className="h-8 w-px bg-white/10" />
+          <div className="flex items-center gap-2">
+            <select 
+              className="bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:bg-white/20 transition-all cursor-pointer"
+              onChange={async (e) => {
+                const newStatus = e.target.value;
+                if (!newStatus || !confirm(`ยืนยันการเปลี่ยนสถานะ ${selectedIds.length} รายการเป็น "${newStatus}"?`)) return;
+                setIsBulkUpdating(true);
+                try {
+                  const res = await fetch('/api/inventory/bulk-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: selectedIds, status: newStatus })
+                  });
+                  if (res.ok) {
+                    setSelectedIds([]);
+                    fetchData();
+                  } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                  }
+                } catch (err) {
+                  alert('Bulk update failed: ' + err.message);
+                } finally {
+                  setIsBulkUpdating(false);
+                }
+              }}
+            >
+              <option value="" className="text-slate-900">เปลี่ยนสถานะเป็น...</option>
+              <option value="Available" className="text-slate-900">พร้อมขาย (Available)</option>
+              <option value="Pending Print" className="text-slate-900">รอพิมพ์ (Pending Print)</option>
+              <option value="Sold" className="text-slate-900">ขายแล้ว (Sold)</option>
+            </select>
+            <button 
+              onClick={() => setSelectedIds([])}
+              className="p-2 hover:bg-white/10 rounded-xl transition-all"
+            >
+              ยกเลิก
+            </button>
+          </div>
+          {isBulkUpdating && <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /></div>

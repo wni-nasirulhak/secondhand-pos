@@ -1,7 +1,7 @@
 'use client';
 import { X, RefreshCw, Camera, Loader2 } from 'lucide-react';
 import { Select, Input, PriceInput } from './FormFields';
-import { BRANDS, CONDITIONS, COLORS, PATTERNS, MATERIALS, PRODUCT_TYPES, SIZES_CLOTHING, SHOE_SIZES_EU } from '@/lib/constants';
+import { BRANDS, CONDITIONS, COLORS, PATTERNS, MATERIALS, PRODUCT_TYPES, SIZES_CLOTHING, SHOE_SIZES_EU, STATUSES } from '@/lib/constants';
 
 export default function InventoryWizard({ 
   step, setStep, selectedType, setSelectedType, form, setF, generateId,
@@ -73,7 +73,10 @@ export default function InventoryWizard({
                 />
                 <Select label="สภาพสินค้า" required value={form.condition} onChange={setF('condition')} options={CONDITIONS} />
               </div>
-              <Input label="ชื่อสินค้า" required value={form.item_name} onChange={setF('item_name')} placeholder={`เช่น เสื้อยืดสีขาว Uniqlo`} />
+              <div className="grid grid-cols-2 gap-4">
+                <Input label="ชื่อสินค้า" required value={form.item_name} onChange={setF('item_name')} placeholder={`เช่น เสื้อยืดสีขาว Uniqlo`} />
+                <Select label="สถานะสินค้า" required value={form.status || 'Available'} onChange={setF('status')} options={STATUSES} />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <Select label="สี" value={form.color} onChange={setF('color')} options={COLORS} placeholder="เลือกสี" />
                 <Select label="ลวดลาย" value={form.pattern} onChange={setF('pattern')} options={PATTERNS} placeholder="เลือกลาย" />
