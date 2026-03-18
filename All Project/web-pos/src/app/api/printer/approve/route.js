@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { success, error, serverError } from '@/lib/api-response';
 import { batch, prepare } from '@/lib/db';
 
 export async function POST(req) {
@@ -6,7 +6,7 @@ export async function POST(req) {
     const { ids, status } = await req.json();
     
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return NextResponse.json({ error: 'IDs are required' }, { status: 400 });
+      return error('IDs are required', 400);
     }
 
     const targetStatus = status || 'Available';
@@ -23,9 +23,8 @@ export async function POST(req) {
       await batch(statements);
     }
 
-    return NextResponse.json({ success: true, updatedCount: ids.length });
-  } catch (error) {
-    console.error('Approve API Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return success({ updatedCount: ids.length });
+  } catch (err) {
+    return serverError(err);
   }
 }

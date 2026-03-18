@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { success, error, serverError } from '@/lib/api-response';
 import { query } from '@/lib/db';
 
 export async function GET(req) {
@@ -45,7 +45,7 @@ export async function GET(req) {
       GROUP BY DATE(s.timestamp)
       ORDER BY date ASC
     `;
-    
+
     // 2. Revenue by Category (Including Cost for Stacked Bar)
     const revenueByCategorySql = `
       SELECT 
@@ -108,7 +108,7 @@ export async function GET(req) {
       total_cost: 0
     };
 
-    return NextResponse.json({
+    return success({
       revenueByDay: revenueByDay.results || [],
       revenueByCategory: revenueByCategory.results || [],
       topBrands: topBrands.results || [],
@@ -121,8 +121,8 @@ export async function GET(req) {
         totalProfit: (summary.total_revenue || 0) - (summary.total_cost || 0)
       }
     });
-  } catch (error) {
-    console.error('Dashboard Stats API Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (err) {
+    return serverError(err);
   }
 }
+0

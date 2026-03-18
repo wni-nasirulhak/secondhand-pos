@@ -18,18 +18,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="th">
       <body className={`${prompt.variable} font-sans antialiased`}>
-        {/* Sidebar (desktop only via CSS class) */}
-        <Sidebar />
-
-        {/* Bottom nav (mobile only via CSS class) */}
-        <BottomNav />
-
-        {/* Main content area shifts right on desktop, has bottom padding on mobile */}
-        <main className="app-main">
-          <div className="p-4 md:p-6 lg:p-8 max-w-screen-2xl mx-auto">
-            {children}
-          </div>
-        </main>
+        {children}
       </body>
     </html>
   );

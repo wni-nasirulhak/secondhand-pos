@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ShoppingCart, Users, Package, Settings, Store, Database, LayoutDashboard, Printer } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { ShoppingCart, Users, Package, Settings, Store, Database, LayoutDashboard, Printer, LogOut } from 'lucide-react';
 
 const menuItems = [
   { name: 'แดชบอร์ด', href: '/dashboard', icon: LayoutDashboard },
@@ -13,6 +13,17 @@ const menuItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth', { method: 'DELETE' });
+      router.push('/login');
+    } catch (err) {
+      console.error('Logout failed');
+    }
+  };
+
   return (
     /* app-sidebar CSS class handles show/hide and fixed positioning via globals.css */
     <aside className="app-sidebar" style={{ background: '#0f172a', color: 'white', flexDirection: 'column' }}>
@@ -47,8 +58,8 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Settings link */}
-      <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+      {/* Settings & Logout */}
+      <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
         <Link href="/settings" style={{
           display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 16px', borderRadius: '14px',
           textDecoration: 'none', color: '#94a3b8', fontWeight: 600, fontSize: '14px',
@@ -56,6 +67,20 @@ export default function Sidebar() {
           <Settings size={18} />
           <span>ตั้งค่าระบบ</span>
         </Link>
+        
+        <button 
+          onClick={handleLogout}
+          style={{
+            width: '100%', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 16px', borderRadius: '14px',
+            textDecoration: 'none', color: '#fca5a5', fontWeight: 600, fontSize: '14px',
+            background: 'transparent',
+          }}
+          className="hover:bg-rose-500/10 transition-all"
+        >
+          <LogOut size={18} />
+          <span>ออกจากระบบ</span>
+        </button>
       </div>
     </aside>
   );

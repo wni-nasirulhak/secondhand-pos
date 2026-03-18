@@ -35,6 +35,7 @@ export default function DashboardPage() {
   // Data
   const [dashboardData, setDashboardData] = useState(null);
   const [sales, setSales] = useState([]);
+  const [salesCount, setSalesCount] = useState(0);
   const [categories, setCategories] = useState([]);
   const [inventory, setInventory] = useState([]); // Store full inventory for dependent filters
   const [loading, setLoading] = useState(true);
@@ -94,7 +95,8 @@ export default function DashboardPage() {
         const salesData = await salesRes.json();
         
         setDashboardData(statsData);
-        setSales(Array.isArray(salesData) ? salesData : []);
+        setSales(Array.isArray(salesData.sales) ? salesData.sales : []);
+        setSalesCount(salesData.pagination?.total || 0);
       } catch (err) {
         console.error('Fetch error:', err);
       } finally {
@@ -117,7 +119,7 @@ export default function DashboardPage() {
     }));
   }, [dashboardData, salesLimit, currentPage]);
 
-  const totalPages = Math.ceil((dashboardData?.recentSales?.length || 0) / salesLimit);
+  const totalPages = Math.ceil(salesCount / salesLimit);
 
   const categoryBarData = useMemo(() => {
     if (!dashboardData) return [];
@@ -463,7 +465,7 @@ export default function DashboardPage() {
               onPageChange={setCurrentPage}
               itemsPerPage={salesLimit}
               onItemsPerPageChange={(val) => { setSalesLimit(val); setCurrentPage(1); }}
-              totalItems={dashboardData?.recentSales?.length || 0}
+              totalItems={salesCount}
             />
           </div>
         </div>

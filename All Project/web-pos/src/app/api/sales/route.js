@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { success, error, serverError } from '@/lib/api-response';
 import { query } from '@/lib/db';
 
 export async function GET(req) {
@@ -29,33 +29,58 @@ export async function GET(req) {
       params.push(`%${brand}%`);
     }
 
+    const limit = parseInt(searchParams.get('limit')) || 50;
+    const page = parseInt(searchParams.get('page')) || 1;
+    const offset = (page - 1) * limit;
+
+    const whereSql = whereClause;
+    
+    // Total count query
+    const countSql = `
+      SELECT COUNT(DISTINCT s.id) as total 
+      FROM sales s
+      JOIN sale_items si ON s.id = si.sale_id
+      JOIN products p ON si.product_id = p.id
+      ${whereSql}
+    `;
+    const countRes = await query(countSql, params);
+    const total = countRes.results?.[0]?.total || 0;
+
     const sql = `
       SELECT 
         s.id AS ID,
         s.sale_no AS Sale_No,
-        p.item_name AS Product_Name,
+        GROUP_CONCAT(p.item_name, ', ') AS Product_Name,
         c.name AS Customer_Name,
         s.timestamp AS Timestamp,
-        si.unit_price AS Price,
-        p.cost_price AS Cost,
-        (si.unit_price - p.cost_price) AS Profit_Baht,
+        SUM(si.unit_price) AS Price,
+        SUM(p.cost_price) AS Cost,
+        SUM(si.unit_price - p.cost_price) AS Profit_Baht,
         CASE 
-          WHEN p.cost_price > 0 THEN ((si.unit_price - p.cost_price) / p.cost_price) * 100 
+          WHEN SUM(p.cost_price) > 0 THEN (SUM(si.unit_price - p.cost_price) / SUM(p.cost_price)) * 100 
           ELSE 100 
         END AS Profit_Percent
       FROM sales s
       JOIN sale_items si ON s.id = si.sale_id
       JOIN products p ON si.product_id = p.id
       LEFT JOIN customers c ON s.customer_id = c.id
-      ${whereClause}
+      ${whereSql}
+      GROUP BY s.id
       ORDER BY s.timestamp DESC
-      LIMIT 50
+      LIMIT ? OFFSET ?
     `;
     
-    const { results } = await query(sql, params);
-    return NextResponse.json(results);
-  } catch (error) {
-    console.error('Sales API Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { results } = await query(sql, [...params, limit, offset]);
+    return success({ 
+      sales: results,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    return serverError(err);
   }
 }

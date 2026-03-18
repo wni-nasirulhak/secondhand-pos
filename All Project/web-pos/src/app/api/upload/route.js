@@ -1,15 +1,15 @@
-import { NextResponse } from 'next/server';
+import { success, error, serverError } from '@/lib/api-response';
 
-// Cloudinary unsigned upload proxy
-// This endpoint accepts a file from the frontend and uploads to Cloudinary using unsigned preset
-// to avoid CORS issues on some devices.
+/**
+ * Cloudinary unsigned upload proxy
+ */
 export async function POST(req) {
   try {
     const formData = await req.formData();
     const file = formData.get('file');
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      return error('No file provided', 400);
     }
 
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'domga8omv';
@@ -36,16 +36,12 @@ export async function POST(req) {
       }
       
       console.error('Cloudinary upload error:', errText);
-      return NextResponse.json({ 
-        error: errorMessage,
-        suggestion: `Check if upload preset "${uploadPreset}" is created as "Unsigned" in your Cloudinary Settings > Upload dashboard. Error Detail: ${errText}`
-      }, { status: 400 });
+      return error(errorMessage, 400);
     }
 
     const data = await res.json();
-    return NextResponse.json({ url: data.secure_url, public_id: data.public_id });
-  } catch (error) {
-    console.error('Upload Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return success({ url: data.secure_url, public_id: data.public_id });
+  } catch (err) {
+    return serverError(err);
   }
 }

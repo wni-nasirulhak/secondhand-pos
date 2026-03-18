@@ -61,8 +61,10 @@ export async function getDB() {
       const results = [];
       const transaction = localDb.transaction((stmts) => {
         for (const s of stmts) {
-          // Use the sync runner
-          results.push(s._syncRun());
+          // Statements in batch usually provide results (like all() or run())
+          // For simplicity in our mock, we use the internal _syncRun which returns the better-sqlite3 info/results
+          const res = s._syncRun();
+          results.push({ results: Array.isArray(res) ? res : [], meta: res.changes !== undefined ? { changes: res.changes, last_row_id: res.lastInsertRowid } : {} });
         }
       });
       transaction(statements);

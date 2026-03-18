@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { success, error, serverError } from '@/lib/api-response';
 import { query, prepare } from '@/lib/db';
 
 // export const runtime = 'edge';
@@ -22,10 +22,9 @@ export async function GET() {
     `;
     
     const { results } = await query(sql);
-    return NextResponse.json(results);
-  } catch (error) {
-    console.error('Inventory API Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return success(results);
+  } catch (err) {
+    return serverError(err);
   }
 }
 
@@ -83,10 +82,9 @@ export async function POST(req) {
       )).run();
     }
 
-    return NextResponse.json({ success: true, id: productId });
-  } catch (error) {
-    console.error('Inventory POST Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return success({ id: productId });
+  } catch (err) {
+    return serverError(err);
   }
 }
 
@@ -98,7 +96,7 @@ export async function PUT(req) {
       clothing, shoes, category_name
     } = data;
 
-    if (!id) return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    if (!id) return error('ID is required', 400);
 
     // 1. Update product
     await (await prepare(
@@ -154,9 +152,8 @@ export async function PUT(req) {
       )).run();
     }
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Inventory PUT Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return success();
+  } catch (err) {
+    return serverError(err);
   }
 }

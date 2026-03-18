@@ -9,6 +9,7 @@ import Pagination from '@/components/Pagination';
 
 export default function CrmPage() {
   const [customers, setCustomers] = useState([]);
+  const [totalCustomersResult, setTotalCustomersResult] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -27,14 +28,21 @@ export default function CrmPage() {
 
   useEffect(() => {
     fetchCustomers();
-  }, []);
+  }, [currentPage, customersPerPage, searchQuery]);
 
   async function fetchCustomers() {
     setLoading(true);
     try {
-      const res = await fetch('/api/customers');
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: customersPerPage,
+        q: searchQuery
+      });
+      const res = await fetch(`/api/customers?${params.toString()}`);
       const data = await res.json();
-      setCustomers(Array.isArray(data) ? data : []);
+      setCustomers(Array.isArray(data.customers) ? data.customers : []);
+      setTotalCustomersResult(data.pagination?.total || 0);
+      // Pre-fetching stats if needed or use stats from a separate API if they are global
     } catch (err) {
       console.error(err);
     } finally {
@@ -74,26 +82,9 @@ export default function CrmPage() {
     }
   };
 
-  const filteredCustomers = useMemo(() => {
-    return customers.filter(c => {
-      const term = searchQuery.toLowerCase();
-      const phone = c.Phone || c.Phone_Number || '';
-      const name = c.Name || c.Customer_Name || '';
-      return phone.includes(term) || name.toLowerCase().includes(term);
-    });
-  }, [customers, searchQuery]);
-
-  // Reset page when search changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
-
-  const paginatedCustomers = useMemo(() => {
-    const start = (currentPage - 1) * customersPerPage;
-    return filteredCustomers.slice(start, start + customersPerPage);
-  }, [filteredCustomers, currentPage, customersPerPage]);
-
-  const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
+  const paginatedCustomers = customers;
+  const filteredCustomers = customers; // Already filtered by server
+  const totalPages = Math.ceil(totalCustomersResult / customersPerPage); 
 
   const stats = useMemo(() => {
     const totalSpent = customers.reduce((sum, c) => sum + (parseFloat(c.Total_Spent || c.Total_Purchase || 0)), 0);
@@ -268,7 +259,7 @@ export default function CrmPage() {
               onPageChange={setCurrentPage}
               itemsPerPage={customersPerPage}
               onItemsPerPageChange={(val) => { setCustomersPerPage(val); setCurrentPage(1); }}
-              totalItems={filteredCustomers.length}
+              totalItems={totalCustomersResult}
             />
           </div>
         </div>
