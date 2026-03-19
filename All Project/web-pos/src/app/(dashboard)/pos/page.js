@@ -19,7 +19,7 @@ export default function PosPage() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 min-h-[calc(100vh-140px)] lg:h-[calc(100vh-120px)] overflow-hidden items-stretch">
+    <div className="flex flex-col lg:flex-row gap-6 min-h-[calc(100vh-140px)] lg:h-[calc(100vh-120px)] lg:overflow-hidden items-stretch px-3 md:px-0">
       {/* Product Grid Section */}
       <div className="flex-1 flex flex-col gap-4 min-w-0 h-full overflow-hidden">
         <PosSearch 
@@ -80,6 +80,16 @@ export default function PosPage() {
         total={pos.total}
         checkoutLoading={pos.checkoutLoading}
         handleCheckout={pos.handleCheckout}
+        discountAmount={pos.discountAmount}
+        setDiscountAmount={pos.setDiscountAmount}
+        shippingCost={pos.shippingCost}
+        setShippingCost={pos.setShippingCost}
+        packingCost={pos.packingCost}
+        setPackingCost={pos.setPackingCost}
+        otherCost={pos.otherCost}
+        setOtherCost={pos.setOtherCost}
+        pointsUsed={pos.pointsUsed}
+        setPointsUsed={pos.setPointsUsed}
       />
 
       {/* Result & Receipt Modal */}

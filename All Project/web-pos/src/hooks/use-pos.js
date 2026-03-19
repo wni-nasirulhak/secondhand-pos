@@ -19,6 +19,9 @@ export function usePos() {
   const [pointsUsed, setPointsUsed] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [discountAmount, setDiscountAmount] = useState(0);
+  const [shippingCost, setShippingCost] = useState(0);
+  const [packingCost, setPackingCost] = useState(0);
+  const [otherCost, setOtherCost] = useState(0);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
@@ -85,7 +88,7 @@ export function usePos() {
   };
 
   const subtotal = cart.reduce((sum, item) => sum + parseFloat(item.selling_price || 0), 0);
-  const total = Math.max(0, subtotal - discountAmount - pointsUsed);
+  const total = Math.max(0, subtotal - discountAmount - pointsUsed + shippingCost + packingCost + otherCost);
 
   const findCustomer = () => {
     const searchNorm = phoneSearch;
@@ -117,6 +120,9 @@ export function usePos() {
           paymentMethod,
           discountAmount,
           pointsUsed,
+          shippingCost,
+          packingCost,
+          otherCost,
           newCustomerName
         })
       });
@@ -134,6 +140,10 @@ export function usePos() {
         setPhoneSearch('');
         setSelectedCustomer(null);
         setCustomerAddress('');
+        setShippingCost(0);
+        setPackingCost(0);
+        setOtherCost(0);
+        setDiscountAmount(0);
         fetchData(); // Refresh data
       } else {
         alert('เกิดข้อผิดพลาด: ' + data.error);
@@ -159,6 +169,9 @@ export function usePos() {
     pointsUsed, setPointsUsed,
     paymentMethod, setPaymentMethod,
     discountAmount, setDiscountAmount,
+    shippingCost, setShippingCost,
+    packingCost, setPackingCost,
+    otherCost, setOtherCost,
     checkoutLoading, showResultModal, setShowResultModal,
     lastSaleData,
     // Derived

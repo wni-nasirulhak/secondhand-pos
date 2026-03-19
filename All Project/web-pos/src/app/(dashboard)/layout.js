@@ -7,7 +7,7 @@ export default function DashboardLayout({ children }) {
       <Sidebar />
       <BottomNav />
       <main className="app-main">
-        <div className="p-4 md:p-6 lg:p-8 max-w-screen-2xl mx-auto">
+        <div className="p-2 md:p-6 lg:p-8 max-w-screen-2xl mx-auto">
           {children}
         </div>
       </main>

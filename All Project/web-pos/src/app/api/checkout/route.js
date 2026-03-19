@@ -10,13 +10,9 @@ export async function POST(req) {
   try {
     const payload = await req.json();
     const { 
-      cart, 
-      customerPhone, 
-      customerAddress, 
-      paymentMethod, 
-      discountAmount, 
-      pointsUsed, 
-      newCustomerName 
+      cart, customerPhone, customerAddress, 
+      paymentMethod, discountAmount, pointsUsed, 
+      newCustomerName, shippingCost, packingCost, otherCost 
     } = payload;
 
     if (!cart || cart.length === 0) return error('Cart is empty');
@@ -24,12 +20,8 @@ export async function POST(req) {
     const saleNo = `SALE-${Date.now()}`;
     const receiptNo = `REC-${Date.now()}`;
     
-    let subtotal = 0;
-    cart.forEach(item => {
-      subtotal += parseFloat(item.selling_price || item.Price || 0);
-    });
-    
-    const finalPrice = subtotal - (parseFloat(discountAmount) || 0);
+    const subtotal = cart.reduce((sum, item) => sum + parseFloat(item.selling_price || item.Price || 0), 0);
+    const finalPrice = Math.max(0, subtotal - (parseFloat(discountAmount) || 0) - (parseFloat(pointsUsed) || 0) + (parseFloat(shippingCost) || 0) + (parseFloat(packingCost) || 0) + (parseFloat(otherCost) || 0));
     const pointsEarned = Math.floor(finalPrice / 100);
 
     const targetPhone = normPhone(customerPhone);
@@ -41,8 +33,13 @@ export async function POST(req) {
       const customer = await getFirst('SELECT id, points, total_spent, address FROM customers WHERE phone = ?', [targetPhone]);
       
       if (customer) {
+        // Validation: check if points are enough
+        if (pointsUsed > 0 && (customer.points || 0) < pointsUsed) {
+          return error(`ลูกค้ามีแต้มไม่ถึง (มี ${customer.points} แต้ม)`);
+        }
+
         customerId = customer.id;
-        const newPoints = (customer.points || 0) - (pointsUsed || 0) + pointsEarned;
+        const newPoints = Math.max(0, (customer.points || 0) - (pointsUsed || 0)) + pointsEarned;
         const newSpent = (customer.total_spent || 0) + finalPrice;
         
         finalizeCustomerStatement = await prepare(
@@ -59,10 +56,17 @@ export async function POST(req) {
       }
     }
 
-    // 2. Create Sale Header (Execution to get ID)
+    // 2. Create Sale Header
     const saleHeaderRes = await (await prepare(
-      'INSERT INTO sales (sale_no, customer_id, final_total, payment_method, receipt_no) VALUES (?, ?, ?, ?, ?)',
-      [saleNo, customerId, finalPrice, paymentMethod || 'Cash', receiptNo]
+      'INSERT INTO sales (sale_no, customer_id, subtotal, final_total, discount_total, shipping_total, packing_total, other_total, payment_method, receipt_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        saleNo, customerId, subtotal, finalPrice, 
+        (parseFloat(discountAmount) || 0) + (parseFloat(pointsUsed) || 0),
+        parseFloat(shippingCost) || 0,
+        parseFloat(packingCost) || 0,
+        parseFloat(otherCost) || 0,
+        paymentMethod || 'Cash', receiptNo
+      ]
     )).run();
     const saleId = saleHeaderRes.meta.last_row_id;
 

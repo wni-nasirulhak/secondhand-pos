@@ -28,18 +28,18 @@ export default function BottomNav() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '10px 4px',
-              gap: '3px',
+              padding: '6px 2px',
+              gap: '2px',
               textDecoration: 'none',
               color: isActive ? '#4f46e5' : '#94a3b8',
-              minHeight: '60px',
+              minHeight: '52px',
               transition: 'all 0.15s',
             }}
           >
-            <div style={{ padding: '5px', borderRadius: '10px', background: isActive ? '#eef2ff' : 'transparent' }}>
-              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+            <div style={{ padding: '2px', borderRadius: '6px', background: isActive ? '#eef2ff' : 'transparent' }}>
+               <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
             </div>
-            <span style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1 }}>{item.name}</span>
+            <span style={{ fontSize: '7px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.01em', lineHeight: 1 }}>{item.name}</span>
           </Link>
         );
       })}

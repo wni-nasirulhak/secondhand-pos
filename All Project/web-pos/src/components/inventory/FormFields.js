@@ -14,8 +14,8 @@ export function Field({ label, required, children }) {
   );
 }
 
-const inputCls = "w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 font-medium outline-none focus:border-indigo-400 focus:bg-white transition-all placeholder:text-gray-300 text-sm";
-const selectCls = "w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 font-medium outline-none focus:border-indigo-400 focus:bg-white transition-all text-sm appearance-none";
+const inputCls = "w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 md:py-3 text-gray-800 font-medium outline-none focus:border-indigo-400 focus:bg-white transition-all placeholder:text-gray-300 text-sm";
+const selectCls = "w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 md:py-3 text-gray-800 font-medium outline-none focus:border-indigo-400 focus:bg-white transition-all text-sm appearance-none";
 
 export function Select({ label, value, onChange, options, placeholder, required }) {
   return (
@@ -62,11 +62,11 @@ export function PriceInput({ label, value, onChange, required }) {
           step="10"
           min="0"
           onChange={e => onChange(e.target.value)}
-          className="flex-1 bg-transparent py-3 text-gray-800 font-bold outline-none text-sm [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+          className="flex-1 bg-transparent py-2 md:py-3 text-gray-800 font-bold outline-none text-sm [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
         />
         <div className="flex border-l border-gray-200 shrink-0">
-          <button type="button" onClick={() => onChange(String(num + 10))} className="px-3 py-3 hover:bg-indigo-50 text-gray-500 font-black text-sm transition-colors border-r border-gray-200">+</button>
-          <button type="button" onClick={() => onChange(String(Math.max(0, num - 10)))} className="px-3 py-3 hover:bg-red-50 text-gray-500 font-black text-sm transition-colors">−</button>
+          <button type="button" onClick={() => onChange(String(num + 10))} className="px-3 py-2 md:py-3 hover:bg-indigo-50 text-gray-500 font-black text-sm transition-colors border-r border-gray-200">+</button>
+          <button type="button" onClick={() => onChange(String(Math.max(0, num - 10)))} className="px-3 py-2 md:py-3 hover:bg-red-50 text-gray-500 font-black text-sm transition-colors">−</button>
         </div>
       </div>
     </Field>

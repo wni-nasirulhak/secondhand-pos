@@ -53,11 +53,11 @@ export async function GET(req) {
         GROUP_CONCAT(p.item_name, ', ') AS Product_Name,
         c.name AS Customer_Name,
         s.timestamp AS Timestamp,
-        SUM(si.unit_price) AS Price,
-        SUM(p.cost_price) AS Cost,
-        SUM(si.unit_price - p.cost_price) AS Profit_Baht,
+        SUM(si.subtotal) AS Price,
+        SUM(p.cost_price * si.quantity) AS Cost,
+        SUM(si.subtotal - (p.cost_price * si.quantity)) AS Profit_Baht,
         CASE 
-          WHEN SUM(p.cost_price) > 0 THEN (SUM(si.unit_price - p.cost_price) / SUM(p.cost_price)) * 100 
+          WHEN SUM(p.cost_price * si.quantity) > 0 THEN (SUM(si.subtotal - (p.cost_price * si.quantity)) / SUM(p.cost_price * si.quantity)) * 100 
           ELSE 100 
         END AS Profit_Percent
       FROM sales s

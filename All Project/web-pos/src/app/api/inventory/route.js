@@ -157,3 +157,20 @@ export async function PUT(req) {
     return serverError(err);
   }
 }
+
+export async function PATCH(req) {
+  try {
+    const { ids, status } = await req.json();
+    if (!ids || !Array.isArray(ids) || !status) return error('IDs and status are required', 400);
+
+    const placeholders = ids.map(() => '?').join(',');
+    await (await prepare(
+      `UPDATE products SET status = ? WHERE id IN (${placeholders})`,
+      [status, ...ids]
+    )).run();
+
+    return success();
+  } catch (err) {
+    return serverError(err);
+  }
+}

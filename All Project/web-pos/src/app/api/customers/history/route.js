@@ -28,11 +28,11 @@ export async function GET(req) {
         s.discount_total as discount,
         (SELECT COUNT(*) FROM sale_items WHERE sale_id = s.id) as total_items,
         (
-          SELECT GROUP_CONCAT(p.item_name || '||' || p.barcode_id, ';;')
+          SELECT '[' || GROUP_CONCAT('{"name":"' || REPLACE(p.item_name, '"', '\"') || '","barcode":"' || p.barcode_id || '"}') || ']'
           FROM sale_items si
           JOIN products p ON si.product_id = p.id
           WHERE si.sale_id = s.id
-        ) as items_detail
+        ) as items_json
       FROM sales s
       WHERE s.customer_id = ?
       ORDER BY s.timestamp DESC

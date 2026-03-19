@@ -41,7 +41,7 @@ export async function GET(req) {
       FROM sales s
       JOIN sale_items si ON s.id = si.sale_id
       JOIN products p ON si.product_id = p.id
-      ${whereClause.replace('s.timestamp', 's.timestamp')} ${itemFilter}
+      ${whereClause} ${itemFilter}
       GROUP BY DATE(s.timestamp)
       ORDER BY date ASC
     `;

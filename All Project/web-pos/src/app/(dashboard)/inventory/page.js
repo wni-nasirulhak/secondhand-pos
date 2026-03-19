@@ -19,6 +19,7 @@ export default function InventoryPage() {
   const [filterStatus, setFilterStatus] = useState('All');
   const [selectedIds, setSelectedIds] = useState([]);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [bulkStatus, setBulkStatus] = useState('');
   
   const [showWizard, setShowWizard] = useState(false);
   const [step, setStep] = useState(1);
@@ -198,98 +199,150 @@ export default function InventoryPage() {
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
 
   return (
-    <div className="min-h-screen pb-20">
-      <div className="flex items-center justify-between mb-6">
+    <div className="min-h-screen pb-16">
+      <div className="flex items-center justify-between mb-2 md:mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">คลังสินค้า</h1>
-          <p className="text-sm text-gray-400 font-medium mt-0.5">Rizan&apos;s Thrift POS · ระบบจัดการสต็อก (Standardized)</p>
+          <h1 className="text-xl md:text-2xl font-black text-gray-900">คลังสินค้า</h1>
+          <p className="text-[10px] md:text-sm text-gray-400 font-medium mt-0.5 uppercase tracking-wider">Rizan&apos;s Thrift POS · STOCK</p>
         </div>
         <button
           onClick={() => { setShowWizard(true); setStep(1); }}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all text-sm"
+          className="flex items-center gap-1 md:gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold px-2 py-1.5 md:px-5 md:py-2.5 rounded-lg md:rounded-xl shadow-lg transition-all text-[12px] md:text-sm"
         >
-          <Plus className="w-5 h-5" />
-          <span>เพิ่มสินค้า</span>
+          <Plus className="w-3.5 h-3.5 md:w-5 md:h-5" />
+          <span className="hidden md:inline">เพิ่มสินค้า</span>
+          <span className="md:hidden">เพิ่ม</span>
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-3 mb-6 bg-white p-4 rounded-[28px] border border-slate-100 shadow-sm">
-        <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4 transition-colors group-focus-within:text-indigo-500" />
-          <input
-            type="text"
-            placeholder="ค้นหาชื่อสินค้า, รหัสบาร์โค้ด..."
-            className="w-full pl-11 pr-4 py-3 rounded-2xl border border-slate-50 bg-slate-50 outline-none focus:border-indigo-400 focus:bg-white font-bold text-sm text-slate-700 placeholder:text-slate-300 transition-all"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
+      <div className="flex flex-col gap-2 mb-3 md:mb-6">
+      <div className="sticky top-0 z-20 bg-[#f8fafc]/80 backdrop-blur-md pt-1 pb-2 mb-1 -mx-3 px-3 md:pt-0 md:pb-0 md:mb-6 md:mx-0 md:px-0 md:relative md:bg-transparent md:backdrop-blur-none">
+        <div className="flex flex-col gap-1 md:gap-3">
+          <div className="flex flex-col md:flex-row gap-1.5 md:gap-3 bg-white p-1.5 md:p-4 rounded-xl md:rounded-[28px] border border-slate-100 shadow-sm">
+            <div className="relative flex-1 group">
+              <Search className="absolute left-2.5 md:left-4 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3 md:w-4 md:h-4 transition-colors group-focus-within:text-indigo-500" />
+              <input
+                type="text"
+                placeholder="ค้นหา..."
+                className="w-full pl-6 md:pl-10 pr-2 py-0.5 md:py-2 rounded-[4px] md:rounded-xl border border-slate-50 bg-slate-50 outline-none focus:border-indigo-400 focus:bg-white font-bold text-[9px] md:text-sm text-slate-700 placeholder:text-slate-300 transition-all"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            <div className="hidden md:flex flex-wrap items-center gap-2">
+              <select value={filterCat} onChange={e => setFilterCat(e.target.value)} className="appearance-none bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-600 text-xs outline-none focus:border-indigo-400 transition-all cursor-pointer min-w-[120px]">
+                <option value="">ทุกหมวดหมู่</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <select value={filterBrand} onChange={e => setFilterBrand(e.target.value)} className="appearance-none bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-600 text-xs outline-none focus:border-indigo-400 transition-all cursor-pointer min-w-[120px]">
+                <option value="">ทุกแบรนด์</option>
+                {brandOptions.map(b => <option key={b} value={b}>{b}</option>)}
+              </select>
+              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="appearance-none bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-600 text-xs outline-none focus:border-indigo-400 transition-all cursor-pointer min-w-[120px]">
+                 <option value="All">ทุกสถานะ</option>
+                 <option value="Available">พร้อมขาย</option>
+                 <option value="Pending Print">รอพิมพ์บาร์โค้ด</option>
+                 <option value="Sold">ขายแล้ว</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Mobile Sub-Filters */}
+          <div className="md:hidden flex flex-col gap-1.5">
+             <div className="category-scroll hide-scrollbar">
+               <button 
+                 onClick={() => setFilterCat('')}
+                 className={`category-chip !py-0.5 !px-2 !text-[9px] ${filterCat === '' ? 'active' : ''}`}
+               >
+                 ทั้งหมด
+               </button>
+               {categories.map(c => (
+                 <button 
+                   key={c.id} 
+                   onClick={() => setFilterCat(String(c.id))}
+                   className={`category-chip !py-0.5 !px-2 !text-[9px] ${String(filterCat) === String(c.id) ? 'active' : ''}`}
+                 >
+                   {c.name}
+                 </button>
+               ))}
+             </div>
+             
+             <div className="grid grid-cols-2 gap-1.5">
+               <select value={filterBrand} onChange={e => setFilterBrand(e.target.value)} className="appearance-none bg-white border border-slate-100 rounded-lg px-2.5 py-1.5 font-bold text-slate-600 text-[9px] outline-none shadow-sm">
+                 <option value="">แบรนด์ทั้งหมด</option>
+                 {brandOptions.map(b => <option key={b} value={b}>{b}</option>)}
+               </select>
+               <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="appearance-none bg-white border border-slate-100 rounded-lg px-2.5 py-1.5 font-bold text-slate-600 text-[9px] outline-none shadow-sm">
+                  <option value="All">ทุกสถานะ</option>
+                  <option value="Available">พร้อมขาย</option>
+                  <option value="Pending Print">รอพิมพ์</option>
+                  <option value="Sold">ขายแล้ว</option>
+               </select>
+             </div>
+          </div>
         </div>
-        
-        <div className="flex flex-wrap items-center gap-2">
-          <select value={filterCat} onChange={e => setFilterCat(e.target.value)} className="appearance-none bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-600 text-xs outline-none focus:border-indigo-400 transition-all cursor-pointer min-w-[120px]">
-            <option value="">ทุกหมวดหมู่</option>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-          <select value={filterBrand} onChange={e => setFilterBrand(e.target.value)} className="appearance-none bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-600 text-xs outline-none focus:border-indigo-400 transition-all cursor-pointer min-w-[120px]">
-            <option value="">ทุกแบรนด์</option>
-            {brandOptions.map(b => <option key={b} value={b}>{b}</option>)}
-          </select>
-          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="appearance-none bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-600 text-xs outline-none focus:border-indigo-400 transition-all cursor-pointer min-w-[120px]">
-             <option value="All">ทุกสถานะ</option>
-             <option value="Available">พร้อมขาย</option>
-             <option value="Pending Print">รอพิมพ์บาร์โค้ด</option>
-             <option value="Sold">ขายแล้ว</option>
-          </select>
-        </div>
+      </div>
       </div>
 
       {selectedIds.length > 0 && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[80] bg-indigo-900/90 backdrop-blur-md text-white px-6 py-4 rounded-[32px] shadow-2xl flex items-center gap-6 animate-in slide-in-from-bottom-8">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Selected Items</span>
-            <span className="text-lg font-black">{selectedIds.length} รายการ</span>
+        <div className="fixed bottom-24 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-max max-w-[calc(100%-2rem)] z-[80] bg-indigo-900/90 backdrop-blur-md text-white px-5 py-3 md:px-6 md:py-4 rounded-[24px] md:rounded-[32px] shadow-2xl flex items-center justify-between md:justify-start gap-3 md:gap-6 animate-in slide-in-from-bottom-8">
+          <div className="flex flex-col shrink-0">
+            <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-indigo-300">Selected</span>
+            <span className="text-sm md:text-lg font-black">{selectedIds.length} <span className="hidden md:inline">รายการ</span></span>
           </div>
-          <div className="h-8 w-px bg-white/10" />
-          <div className="flex items-center gap-2">
+          
+          <div className="h-6 md:h-8 w-px bg-white/10 shrink-0" />
+          
+          <div className="flex items-center gap-1.5 md:gap-2 flex-1 min-w-0">
             <select 
-              className="bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:bg-white/20 transition-all cursor-pointer"
-              onChange={async (e) => {
-                const newStatus = e.target.value;
-                if (!newStatus || !confirm(`ยืนยันการเปลี่ยนสถานะ ${selectedIds.length} รายการเป็น "${newStatus}"?`)) return;
-                setIsBulkUpdating(true);
-                try {
-                  const res = await fetch('/api/inventory/bulk-status', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ids: selectedIds, status: newStatus })
-                  });
-                  if (res.ok) {
-                    setSelectedIds([]);
-                    fetchData();
-                  } else {
-                    const err = await res.json();
-                    alert('Error: ' + err.error);
-                  }
-                } catch (err) {
-                  alert('Bulk update failed: ' + err.message);
-                } finally {
-                  setIsBulkUpdating(false);
-                }
-              }}
+              className="flex-1 bg-white/10 border border-white/20 rounded-lg md:rounded-xl px-2 md:px-4 py-1.5 md:py-2 text-[10px] md:text-xs font-bold outline-none focus:bg-white/20 transition-all cursor-pointer min-w-0 truncate"
+              value={bulkStatus}
+              onChange={(e) => setBulkStatus(e.target.value)}
             >
-              <option value="" className="text-slate-900">เปลี่ยนสถานะเป็น...</option>
-              <option value="Available" className="text-slate-900">พร้อมขาย (Available)</option>
-              <option value="Pending Print" className="text-slate-900">รอพิมพ์ (Pending Print)</option>
-              <option value="Sold" className="text-slate-900">ขายแล้ว (Sold)</option>
+              <option value="" className="text-slate-900">เลือกสถานะ...</option>
+              <option value="Available" className="text-slate-900">พร้อมขาย</option>
+              <option value="Pending Print" className="text-slate-900">รอพิมพ์</option>
+              <option value="Sold" className="text-slate-900">ขายแล้ว</option>
             </select>
-            <button 
-              onClick={() => setSelectedIds([])}
-              className="p-2 hover:bg-white/10 rounded-xl transition-all"
+            
+            <button
+               onClick={async () => {
+                 if (!bulkStatus) return;
+                 setIsBulkUpdating(true);
+                 try {
+                   const res = await fetch('/api/inventory/bulk-status', {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify({ ids: selectedIds, status: bulkStatus })
+                   });
+                   if (res.ok) {
+                     setSelectedIds([]);
+                     setBulkStatus('');
+                     fetchData();
+                   } else {
+                     const err = await res.json();
+                     alert('Error: ' + err.error);
+                   }
+                 } catch (err) {
+                   alert('Bulk update failed: ' + err.message);
+                 } finally {
+                   setIsBulkUpdating(false);
+                 }
+               }}
+               disabled={!bulkStatus || isBulkUpdating}
+               className="bg-white text-indigo-900 px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black hover:bg-indigo-50 transition-all disabled:opacity-50 shrink-0"
             >
-              ยกเลิก
+              {isBulkUpdating ? <Loader2 className="w-3 h-3 animate-spin"/> : 'อัปเดต'}
+            </button>
+            <button 
+              onClick={() => { setSelectedIds([]); setBulkStatus(''); }}
+              className="p-1.5 md:p-2 hover:bg-white/10 rounded-lg md:rounded-xl transition-all shrink-0"
+              title="ยกเลิก"
+            >
+              <Plus className="w-4 h-4 rotate-45 text-white/60" />
             </button>
           </div>
-          {isBulkUpdating && <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />}
         </div>
       )}
 

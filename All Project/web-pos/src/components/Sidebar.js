@@ -28,29 +28,29 @@ export default function Sidebar() {
     /* app-sidebar CSS class handles show/hide and fixed positioning via globals.css */
     <aside className="app-sidebar" style={{ background: '#0f172a', color: 'white', flexDirection: 'column' }}>
       {/* Logo */}
-      <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '14px' }}>
-        <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', padding: '10px', borderRadius: '14px', boxShadow: '0 4px 15px rgba(99,102,241,0.4)', display: 'flex', alignItems: 'center' }}>
-          <Store size={22} color="white" />
+      <div style={{ padding: '12px 12px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', padding: '6px', borderRadius: '10px', boxShadow: '0 4px 15px rgba(99,102,241,0.4)', display: 'flex', alignItems: 'center' }}>
+          <Store size={16} color="white" />
         </div>
         <div>
-          <div style={{ color: 'white', fontWeight: 900, fontSize: '17px', fontStyle: 'italic', textTransform: 'uppercase', lineHeight: 1 }}>Rizan&apos;s</div>
-          <div style={{ color: '#818cf8', fontWeight: 700, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>Thrift POS</div>
+          <div style={{ color: 'white', fontWeight: 900, fontSize: '14px', fontStyle: 'italic', textTransform: 'uppercase', lineHeight: 1 }}>Rizan&apos;s</div>
+          <div style={{ color: '#818cf8', fontWeight: 700, fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '1px' }}>Thrift POS</div>
         </div>
       </div>
 
       {/* Nav items */}
-      <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', overflow: 'auto' }}>
+      <nav style={{ flex: 1, padding: '8px 6px', display: 'flex', flexDirection: 'column', gap: '2px', overflow: 'auto' }}>
         {menuItems.map(item => {
           const Icon = item.icon;
           const isActive = pathname === item.href || (item.href !== '/inventory' && pathname?.startsWith(item.href + '/'));
           return (
             <Link key={item.href} href={item.href} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 16px', borderRadius: '14px',
-              textDecoration: 'none', fontWeight: 600, fontSize: '14px', transition: 'all 0.15s',
+              display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', borderRadius: '10px',
+              textDecoration: 'none', fontWeight: 600, fontSize: '12px', transition: 'all 0.15s',
               background: isActive ? '#4f46e5' : 'transparent',
               color: isActive ? 'white' : '#94a3b8',
             }}>
-              <Icon size={18} />
+              <Icon size={16} />
               <span>{item.name}</span>
               {isActive && <div style={{ marginLeft: 'auto', width: 6, height: 6, background: 'rgba(255,255,255,0.5)', borderRadius: '50%' }} />}
             </Link>
@@ -59,12 +59,12 @@ export default function Sidebar() {
       </nav>
 
       {/* Settings & Logout */}
-      <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <div style={{ padding: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '2px' }}>
         <Link href="/settings" style={{
-          display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 16px', borderRadius: '14px',
-          textDecoration: 'none', color: '#94a3b8', fontWeight: 600, fontSize: '14px',
+          display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', borderRadius: '10px',
+          textDecoration: 'none', color: '#94a3b8', fontWeight: 600, fontSize: '12px',
         }}>
-          <Settings size={18} />
+          <Settings size={16} />
           <span>ตั้งค่าระบบ</span>
         </Link>
         
@@ -72,13 +72,13 @@ export default function Sidebar() {
           onClick={handleLogout}
           style={{
             width: '100%', border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 16px', borderRadius: '14px',
-            textDecoration: 'none', color: '#fca5a5', fontWeight: 600, fontSize: '14px',
+            display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', borderRadius: '10px',
+            textDecoration: 'none', color: '#fca5a5', fontWeight: 600, fontSize: '12px',
             background: 'transparent',
           }}
           className="hover:bg-rose-500/10 transition-all"
         >
-          <LogOut size={18} />
+          <LogOut size={16} />
           <span>ออกจากระบบ</span>
         </button>
       </div>

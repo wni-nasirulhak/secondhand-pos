@@ -137,64 +137,65 @@ export default function CrmPage() {
   );
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8 pb-20">
+    <div className="max-w-[1600px] mx-auto space-y-4 md:space-y-8 pb-20 px-3 md:px-6">
       {/* ── HEADER & QUICK STATS ────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 md:gap-6 px-3 md:px-0">
         <div>
-          <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight flex items-center gap-2 md:gap-3">
-            <Users className="w-8 h-8 md:w-10 md:h-10 text-indigo-600" />
+          <h1 className="text-xl md:text-4xl font-black text-slate-800 tracking-tight flex items-center gap-2 md:gap-3">
+            <Users className="w-5 h-5 md:w-10 md:h-10 text-indigo-600" />
             CRM <span className="text-slate-300">Analytics</span>
           </h1>
-          <p className="text-xs md:text-sm text-slate-500 font-bold mt-1 md:mt-2 ml-1">ระบบวิเคราะห์และพฤติกรรมลูกค้าอัจฉริยะ</p>
+          <p className="text-[10px] md:text-sm text-slate-500 font-bold mt-0.5 ml-1 leading-none">Smart Insights</p>
         </div>
         
-        <div className="flex flex-wrap gap-3">
+        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 md:gap-3 px-3 md:px-0">
           {[
             { label: 'Revenue (LTV)', value: `฿${stats.totalSpent.toLocaleString()}`, icon: TrendingUp, color: 'bg-indigo-50 text-indigo-600' },
             { label: 'VIP Members', value: stats.vipCount, icon: Star, color: 'bg-amber-50 text-amber-600' },
             { label: 'Avg Sale', value: `฿${stats.avgSpent.toFixed(0)}`, icon: CreditCard, color: 'bg-emerald-50 text-emerald-600' },
             { label: 'Total Base', value: stats.totalCustomers, icon: Users, color: 'bg-slate-50 text-slate-600' },
           ].map((s, i) => (
-            <div key={i} className="bg-white p-3 md:p-4 rounded-[24px] md:rounded-[28px] border border-slate-100 shadow-sm flex items-center gap-3 md:gap-4 flex-1 min-w-[140px]">
-              <div className={`p-2.5 md:p-3 rounded-xl md:rounded-2xl ${s.color}`}>
-                <s.icon className="w-4 h-4 md:w-5 md:h-5" />
+            <div key={i} className="bg-white p-1.5 md:p-3 rounded-lg md:rounded-[24px] border border-slate-100 shadow-sm flex items-center gap-1.5 md:gap-3 min-w-0">
+              <div className={`p-1 md:p-2.5 rounded-md md:rounded-xl shrink-0 ${s.color}`}>
+                <s.icon className="w-3.5 h-3.5 md:w-5 md:h-5" />
               </div>
-              <div>
-                <div className="text-[8px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">{s.label}</div>
-                <div className="text-base md:text-lg font-black text-slate-800">{s.value}</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[8px] md:text-[10px] font-black uppercase text-slate-400 tracking-tighter leading-none mb-0.5 truncate">{s.label}</div>
+                <div className="text-xs md:text-lg font-black text-slate-800 leading-none truncate">{s.value}</div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 md:gap-6 items-start">
         {/* ── CUSTOMER LIST ─────────────────────────────────── */}
-        <div className="xl:col-span-8 space-y-6">
-          <div className="bg-white p-4 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-4">
-            <div className="relative flex-1 group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5 transition-colors group-focus-within:text-indigo-500" />
-              <input 
-                type="text"
-                placeholder="ค้นหาชื่อ หรือ เบอร์โทรศัพท์..."
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-none outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-slate-700"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-              />
+        <div className="xl:col-span-8 space-y-4 md:space-y-6">
+          <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-md py-2 md:py-0">
+            <div className="bg-white/80 backdrop-blur-md p-1.5 md:p-3 rounded-xl md:rounded-[32px] border border-slate-100 shadow-sm mb-2 md:mb-6">
+              <div className="flex flex-col md:flex-row gap-2 md:gap-4">
+                <div className="relative flex-1 group">
+                  <Search className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 text-slate-300 w-3.5 h-3.5 md:w-5 md:h-5 transition-colors group-focus-within:text-indigo-500" />
+                  <input 
+                    type="text" 
+                    placeholder="ค้นหาลูกค้า (ชื่อ, เบอร์โทร)..." 
+                    className="w-full bg-slate-50 border-2 border-slate-50 rounded-lg md:rounded-2xl pl-10 md:pl-14 pr-4 md:pr-6 py-1.5 md:py-3.5 outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold text-slate-700 text-[10px] md:text-base placeholder:text-slate-300"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
-            <button className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100 transition-all">
-              <Filter className="w-5 h-5" />
-            </button>
           </div>
 
-          <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl md:rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-100">
-                  <th className="px-4 md:px-8 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] md:tracking-[0.2em]">Member Info</th>
-                  <th className="px-4 md:px-8 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] md:tracking-[0.2em] text-center hidden md:table-cell">Status</th>
-                  <th className="px-4 md:px-8 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] md:tracking-[0.2em] text-right">LTV (ยอดรวม)</th>
-                  <th className="px-4 md:px-8 py-4 md:py-6 text-right"></th>
+                  <th className="px-2 md:px-6 py-1 md:py-4 text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-wider">Member Info</th>
+                  <th className="px-2 md:px-6 py-1 md:py-4 text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-wider text-center hidden md:table-cell">Status</th>
+                  <th className="px-2 md:px-6 py-1 md:py-4 text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-wider text-right">LTV</th>
+                  <th className="px-2 md:px-6 py-1 md:py-4 text-right"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -204,15 +205,15 @@ export default function CrmPage() {
                     onClick={() => selectCustomer(cust)}
                     className={`group cursor-pointer transition-all ${selectedCustomer?.Phone === cust.Phone ? 'bg-indigo-50/50' : 'hover:bg-slate-50/30'}`}
                   >
-                    <td className="px-4 md:px-8 py-4 md:py-6">
-                      <div className="flex items-center gap-3 md:gap-4">
-                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-base md:text-xl border border-slate-200 uppercase shrink-0">
+                    <td className="px-2 md:px-6 py-1 md:py-4">
+                      <div className="flex items-center gap-1.5 md:gap-3">
+                        <div className="w-7 h-7 md:w-10 md:h-10 rounded-[4px] md:rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-[10px] md:text-lg border border-slate-200 uppercase shrink-0">
                           {(cust.Name || 'C')[0]}
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <span className="font-black text-slate-800 text-sm md:text-lg leading-tight truncate">{cust.Name || cust.Customer_Name}</span>
-                          <span className="text-[10px] md:text-xs text-slate-400 font-bold flex items-center gap-1.5 mt-0.5 md:mt-1">
-                            <Phone className="w-2.5 h-2.5 md:w-3 md:h-3 text-indigo-400" /> {cust.Phone || cust.Phone_Number}
+                          <span className="font-black text-slate-800 text-[10px] md:text-base leading-none truncate">{cust.Name || cust.Customer_Name}</span>
+                          <span className="text-[8px] md:text-[10px] text-slate-400 font-bold flex items-center gap-0.5 mt-0.5">
+                            <Phone className="w-2 h-2 text-indigo-400" /> {cust.Phone || cust.Phone_Number}
                           </span>
                         </div>
                       </div>
@@ -228,15 +229,15 @@ export default function CrmPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 md:px-8 py-4 md:py-6 text-right">
-                      <div className="text-sm md:text-lg font-black text-slate-800">฿{parseFloat(cust.Total_Spent || 0).toLocaleString()}</div>
-                      <div className="text-[8px] md:text-[10px] text-emerald-500 font-black uppercase">{parseInt(cust.Points || 0)} pts</div>
+                    <td className="px-2 md:px-6 py-1 md:py-4 text-right">
+                      <div className="text-[10px] md:text-base font-black text-slate-800 leading-none">฿{parseFloat(cust.Total_Spent || 0).toLocaleString()}</div>
+                      <div className="text-[7px] md:text-[9px] text-emerald-500 font-black uppercase leading-none mt-0.5">{parseInt(cust.Points || 0)} pts</div>
                     </td>
                     <td className="px-4 md:px-8 py-4 md:py-6 text-right">
-                      <div className="flex items-center justify-end gap-1.5 md:gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-1.5 md:gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={(e) => { e.stopPropagation(); handleEdit(cust); }}
-                          className="p-2 md:p-2.5 bg-white text-slate-400 hover:text-indigo-600 rounded-lg md:rounded-xl shadow-sm border border-slate-100 transition-all"
+                          className="p-1.5 md:p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-all"
                         >
                           <Edit3 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                         </button>
@@ -265,35 +266,35 @@ export default function CrmPage() {
         </div>
 
         {/* ── CUSTOMER DETAIL PANEL ───────────────────────── */}
-        <div className="xl:col-span-4 sticky top-8">
+        <div className="xl:col-span-4 sticky top-4 md:top-8">
           {selectedCustomer ? (
-            <div className="bg-white rounded-[40px] border border-slate-100 shadow-xl overflow-hidden animate-in slide-in-from-right-4">
-              <div className="p-8 bg-indigo-600 text-white relative">
-                 <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="w-24 h-24 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center text-4xl font-black border border-white/30 uppercase">
+            <div className="bg-white rounded-2xl md:rounded-[40px] border border-slate-100 shadow-xl overflow-hidden animate-in slide-in-from-right-4">
+              <div className="p-3 md:p-8 bg-indigo-600 text-white relative">
+                 <div className="flex flex-row items-center gap-3">
+                    <div className="w-12 h-12 md:w-24 md:h-24 rounded-xl md:rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl md:text-4xl font-black border border-white/30 uppercase shrink-0">
                       {(selectedCustomer.Name || 'C')[0]}
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-black leading-tight">{selectedCustomer.Name || selectedCustomer.Customer_Name}</h2>
-                      <div className="text-indigo-200 font-bold mt-1 flex items-center justify-center gap-1.5">
-                        <Phone className="w-4 h-4" /> {selectedCustomer.Phone || selectedCustomer.Phone_Number}
+                    <div className="text-left">
+                      <h2 className="text-lg md:text-2xl font-black leading-none">{selectedCustomer.Name || selectedCustomer.Customer_Name}</h2>
+                      <div className="text-indigo-200 font-bold mt-1.5 flex items-center gap-1 text-[10px] md:text-base">
+                        <Phone className="w-3 h-3 md:w-4 md:h-4" /> {selectedCustomer.Phone || selectedCustomer.Phone_Number}
                       </div>
                     </div>
                  </div>
-                 <button onClick={() => setSelectedCustomer(null)} className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all">
-                   <X className="w-5 h-5" />
+                 <button onClick={() => setSelectedCustomer(null)} className="absolute top-3 right-3 p-1.5 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all">
+                   <X className="w-4 h-4 md:w-5 md:h-5" />
                  </button>
               </div>
 
-              <div className="p-8 space-y-8">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-50 p-4 rounded-3xl">
-                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Lifetime Value</div>
-                    <div className="text-xl font-black text-indigo-600">฿{parseFloat(selectedCustomer.Total_Spent || 0).toLocaleString()}</div>
+              <div className="p-3 md:p-8 space-y-4 md:space-y-8">
+                <div className="grid grid-cols-2 gap-2 md:gap-4">
+                  <div className="bg-slate-50 p-2 md:p-4 rounded-xl md:rounded-3xl border border-slate-100">
+                    <div className="text-[7px] md:text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">LTV</div>
+                    <div className="text-sm md:text-xl font-black text-indigo-600">฿{parseFloat(selectedCustomer.Total_Spent || 0).toLocaleString()}</div>
                   </div>
-                  <div className="bg-slate-50 p-4 rounded-3xl">
-                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Points Balance</div>
-                    <div className="text-xl font-black text-emerald-600">{parseInt(selectedCustomer.Points || 0).toLocaleString()}</div>
+                  <div className="bg-slate-50 p-2 md:p-4 rounded-xl md:rounded-3xl border border-slate-100">
+                    <div className="text-[7px] md:text-[10px] font-black text-slate-400 uppercase tracking-tighter mb-0.5">Points</div>
+                    <div className="text-sm md:text-xl font-black text-emerald-600">{parseInt(selectedCustomer.Points || 0).toLocaleString()}</div>
                   </div>
                 </div>
 
@@ -310,10 +311,12 @@ export default function CrmPage() {
                       <div className="text-center py-10 text-slate-300 text-xs font-bold">ไม่พบประวัติการสั่งซื้อ</div>
                     ) : (
                       (showAllHistory ? purchaseHistory : purchaseHistory.slice(0, 3)).map(sale => {
-                        const items = (sale.items_detail || '').split(';;').filter(Boolean).map(it => {
-                          const [name, barcode] = it.split('||');
-                          return { name, barcode };
-                        });
+                        let items = [];
+                        try {
+                          items = JSON.parse(sale.items_json || '[]');
+                        } catch (e) {
+                          console.error("Parse error for items_json:", e);
+                        }
 
                         return (
                           <div key={sale.id} className="p-3 md:p-4 bg-slate-50/50 border border-slate-100 rounded-2xl group hover:bg-white hover:shadow-md transition-all">
@@ -333,12 +336,12 @@ export default function CrmPage() {
                               {items.map((it, idx) => (
                                 <div key={idx} className="flex justify-between items-center bg-white/50 p-1.5 md:p-2 rounded-xl border border-dotted border-slate-200">
                                   <div className="flex flex-col min-w-0">
-                                    <span className="text-[10px] font-black text-slate-700 truncate max-w-[100px] md:max-w-none">{it.name}</span>
-                                    <span className="text-[8px] font-bold text-slate-400 font-mono">#{it.barcode}</span>
+                                    <span className="text-[9px] font-black text-slate-700 truncate max-w-[100px] md:max-w-none leading-none">{it.name}</span>
+                                    <span className="text-[7px] font-bold text-slate-400 font-mono mt-0.5">#{it.barcode}</span>
                                   </div>
                                   <a 
                                     href={`/inventory?search=${it.barcode}`}
-                                    className="text-[8px] md:text-[9px] font-black text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                                    className="text-[7px] md:text-[8px] font-black text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-1 py-1 rounded-md transition-colors whitespace-nowrap"
                                   >
                                     View
                                   </a>
@@ -365,19 +368,19 @@ export default function CrmPage() {
                   </div>
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-slate-100">
-                  <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
-                    <MapPin className="w-4 h-4" /> Shipping Address
+                <div className="space-y-2 pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <MapPin className="w-3.5 h-3.5" /> Shipping Address
                   </div>
-                  <p className="text-sm font-bold text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100 italic">
+                  <p className="text-xs md:text-sm font-bold text-slate-600 leading-relaxed bg-slate-50 p-3 md:p-4 rounded-xl md:rounded-2xl border border-slate-100 italic">
                     {selectedCustomer.Address || 'ยังไม่ระบุที่อยู่'}
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="h-[600px] bg-slate-50/50 rounded-[40px] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 gap-4 p-8 text-center animate-in fade-in">
-              <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-sm">
+            <div className="h-[300px] md:h-[600px] bg-slate-50/50 rounded-2xl md:rounded-[40px] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 gap-3 md:gap-4 p-6 md:p-8 text-center animate-in fade-in">
+              <div className="w-14 h-14 md:w-20 md:h-20 bg-white rounded-xl md:rounded-3xl flex items-center justify-center shadow-sm">
                 <Users className="w-10 h-10" />
               </div>
               <div>
@@ -391,57 +394,57 @@ export default function CrmPage() {
 
       {/* ── EDIT MODAL ────────────────────────────────────── */}
       {editingCustomer && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[40px] w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95">
-                <div className="p-10 space-y-8">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-end md:items-center justify-center p-0 md:p-4">
+            <div className="bg-white rounded-t-3xl md:rounded-[40px] w-full max-w-lg overflow-hidden shadow-2xl animate-in slide-in-from-bottom md:zoom-in-95">
+                <div className="p-6 md:p-10 space-y-6 md:space-y-8">
                     <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-4">
-                          <div className="p-4 bg-indigo-50 text-indigo-600 rounded-3xl">
-                             <Edit3 className="w-6 h-6" />
+                        <div className="flex items-center gap-3 md:gap-4">
+                          <div className="p-3 md:p-4 bg-indigo-50 text-indigo-600 rounded-2xl md:rounded-3xl">
+                             <Edit3 className="w-5 h-5 md:w-6 md:h-6" />
                           </div>
                           <div>
-                            <h2 className="text-2xl font-black text-slate-800 tracking-tight">แก้ไขข้อมูลส่วนตัว</h2>
-                            <p className="text-slate-400 text-xs font-bold mt-0.5">เบอร์โทรศัพท์: {editingCustomer.Phone || editingCustomer.Phone_Number}</p>
+                            <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Edit Profile</h2>
+                            <p className="text-slate-400 text-[10px] md:text-xs font-bold mt-0.5">Phone: {editingCustomer.Phone || editingCustomer.Phone_Number}</p>
                           </div>
                         </div>
-                        <button onClick={() => setEditingCustomer(null)} className="p-3 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-400 transition-all"><X/></button>
+                        <button onClick={() => setEditingCustomer(null)} className="p-2 md:p-3 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-400 transition-all"><X className="w-4 h-4 md:w-5 md:h-5"/></button>
                     </div>
                     
-                    <form onSubmit={handleUpdate} className="grid grid-cols-1 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Customer Identifier (ชื่อเรียก)</label>
+                    <form onSubmit={handleUpdate} className="grid grid-cols-1 gap-4 md:gap-6">
+                        <div className="space-y-1.5 md:space-y-2">
+                            <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Customer Identifier</label>
                             <input 
-                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl px-6 py-5 outline-none focus:border-indigo-500 focus:bg-white transition-all font-black text-slate-800 text-lg"
+                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl md:rounded-3xl px-4 py-3 md:px-6 md:py-5 outline-none focus:border-indigo-500 focus:bg-white transition-all font-black text-slate-800 text-sm md:text-lg"
                                 value={editName}
                                 onChange={e => setEditName(e.target.value)}
-                                placeholder="เช่น คุณล้อหล่อ, คุณลูกค้า VIP"
+                                placeholder="e.g. John Doe, VIP Customer"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Shipping Logistics (ที่อยู่จัดส่ง)</label>
+                        <div className="space-y-1.5 md:space-y-2">
+                            <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Shipping Logistics (Address)</label>
                             <textarea 
-                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl px-6 py-5 outline-none focus:border-indigo-500 focus:bg-white transition-all min-h-[160px] font-bold text-slate-600 leading-relaxed"
+                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl md:rounded-3xl px-4 py-3 md:px-6 md:py-5 outline-none focus:border-indigo-500 focus:bg-white transition-all min-h-[120px] md:min-h-[160px] font-bold text-slate-600 text-xs md:text-base leading-relaxed"
                                 value={editAddress}
                                 onChange={e => setEditAddress(e.target.value)}
-                                placeholder="ระบุบ้านเลขที่, ถนน, แขวง/เขต..."
+                                placeholder="House number, street, district..."
                             />
                         </div>
                         
-                        <div className="pt-6 flex gap-4">
+                        <div className="pt-4 md:pt-6 flex gap-3 md:gap-4 pb-2">
                             <button 
                                 type="button"
                                 onClick={() => setEditingCustomer(null)}
-                                className="flex-1 bg-slate-100 text-slate-500 font-black py-5 rounded-3xl hover:bg-slate-200 transition-all"
+                                className="flex-1 bg-slate-100 text-slate-500 font-black py-4 md:py-5 rounded-2xl md:rounded-3xl hover:bg-slate-200 transition-all text-xs md:text-base"
                             >
-                                ยกเลิก
+                                Cancel
                             </button>
                             <button 
                                 type="submit"
                                 disabled={saveLoading}
-                                className="flex-[2] bg-indigo-600 text-white font-black py-5 rounded-3xl shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="flex-[2] bg-indigo-600 text-white font-black py-4 md:py-5 rounded-2xl md:rounded-3xl shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-xs md:text-base"
                             >
-                                {saveLoading && <Loader2 className="w-5 h-5 animate-spin" />}
-                                {saveLoading ? 'กำลังบันทึก...' : 'อัปเดตข้อมูล'}
+                                {saveLoading && <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />}
+                                {saveLoading ? 'Saving...' : 'Update Info'}
                             </button>
                         </div>
                     </form>

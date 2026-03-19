@@ -40,6 +40,13 @@ export default function PosReceiptModal({ show, onClose, lastSaleData }) {
                    <Printer className="w-5 h-5" />
                    พิมพ์ใบเสร็จ
                 </button>
+                 <button 
+                    onClick={() => window.location.href = `/printer?saleId=${lastSaleData?.saleId}`}
+                    className="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+                 >
+                    <Printer className="w-5 h-5" />
+                    พิมพ์ใบปะหน้า
+                 </button>
              </div>
           </div>
           

@@ -16,23 +16,23 @@ export default function InventoryWizard({
       </div>
 
       {/* Header */}
-      <div className="shrink-0 px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-        <div>
-          <div className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">ขั้นตอน {step}/4</div>
-          <h2 className="text-base font-black text-gray-900">
-            {step === 1 && '🗂️ เลือกหมวดหมู่สินค้า'}
+      <div className="shrink-0 px-4 py-2.5 md:px-5 md:py-3 border-b border-gray-100 flex items-center justify-between">
+        <div className="flex-1">
+          <div className="text-[8px] md:text-[10px] font-black text-indigo-500 uppercase tracking-widest leading-none mb-1">ขั้นตอน {step}/4</div>
+          <h2 className="text-sm md:text-base font-black text-gray-900 leading-tight">
+            {step === 1 && '🗂️ หมวดหมู่'}
             {step === 2 && '📋 ข้อมูลสินค้า'}
-            {step === 3 && '📐 มาตรวัดและรายละเอียด'}
-            {step === 4 && '📸 รูปภาพสินค้า'}
+            {step === 3 && '📐 รายละเอียด'}
+            {step === 4 && '📸 รูปภาพ'}
           </h2>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex gap-1">
+          <div className="flex gap-0.5 md:gap-1">
             {[1, 2, 3, 4].map(n => (
-              <div key={n} className={`h-1.5 w-6 rounded-full transition-all ${step >= n ? 'bg-indigo-500' : 'bg-gray-100'}`} />
+              <div key={n} className={`h-1 w-4 md:h-1.5 md:w-6 rounded-full transition-all ${step >= n ? 'bg-indigo-500' : 'bg-gray-100'}`} />
             ))}
           </div>
-          <button onClick={closeWizard} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
+          <button onClick={closeWizard} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -44,19 +44,18 @@ export default function InventoryWizard({
 
           {/* STEP 1 */}
           {step === 1 && (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {PRODUCT_TYPES.map(type => (
                 <button
                   key={type.id}
                   type="button"
                   onClick={() => { setSelectedType(type); if (form.brand) generateId(form.brand, type.id); }}
-                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all active:scale-95 ${
-                    selectedType?.id === type.id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-100 bg-white hover:border-gray-200'
+                  className={`flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all active:scale-95 min-h-[80px] ${
+                    selectedType?.id === type.id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-50 bg-white hover:border-gray-100'
                   }`}
                 >
-                  <span className="text-3xl">{type.icon}</span>
-                  <span className="text-xs font-bold text-gray-700 text-center leading-tight">{type.label}</span>
-                  {selectedType?.id === type.id && <span className="w-2 h-2 bg-indigo-500 rounded-full" />}
+                  <span className="text-2xl mb-1">{type.icon}</span>
+                  <span className="text-[10px] font-bold text-gray-700 text-center leading-tight">{type.label}</span>
                 </button>
               ))}
             </div>
@@ -64,110 +63,107 @@ export default function InventoryWizard({
 
           {/* STEP 2 */}
           {step === 2 && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
                 <Select
                   label="แบรนด์" required value={form.brand}
                   onChange={v => { setF('brand')(v); if (selectedType) generateId(v, selectedType.id); }}
                   options={BRANDS} placeholder="เลือกแบรนด์"
                 />
-                <Select label="สภาพสินค้า" required value={form.condition} onChange={setF('condition')} options={CONDITIONS} />
+                <Select label="สภาพ" required value={form.condition} onChange={setF('condition')} options={CONDITIONS} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="ชื่อสินค้า" required value={form.item_name} onChange={setF('item_name')} placeholder={`เช่น เสื้อยืดสีขาว Uniqlo`} />
-                <Select label="สถานะสินค้า" required value={form.status || 'Available'} onChange={setF('status')} options={STATUSES} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+              <Input label="ชื่อสินค้า" required value={form.item_name} onChange={setF('item_name')} placeholder={`เช่น เสื้อยืดสีขาว Uniqlo`} />
+              <div className="grid grid-cols-2 gap-2">
+                <Select label="สถานะ" required value={form.status || 'Available'} onChange={setF('status')} options={STATUSES} />
                 <Select label="สี" value={form.color} onChange={setF('color')} options={COLORS} placeholder="เลือกสี" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Select label="วัสดุ/ผ้า" value={form.material} onChange={setF('material')} options={MATERIALS} placeholder="เลือกวัสดุ" />
                 <Select label="ลวดลาย" value={form.pattern} onChange={setF('pattern')} options={PATTERNS} placeholder="เลือกลาย" />
               </div>
-              <Select label="วัสดุ/ผ้า" value={form.material} onChange={setF('material')} options={MATERIALS} placeholder="เลือกวัสดุ" />
-              <div className="grid grid-cols-2 gap-4">
-                <PriceInput label="🔻 ต้นทุน (฿)" value={form.cost_price} onChange={setF('cost_price')} />
-                <PriceInput label="🔥 ราคาขาย (฿)" required value={form.selling_price} onChange={setF('selling_price')} />
+              <div className="grid grid-cols-2 gap-2">
+                <PriceInput label="ต้นทุน (฿)" value={form.cost_price} onChange={setF('cost_price')} />
+                <PriceInput label="ราคาขาย (฿)" required value={form.selling_price} onChange={setF('selling_price')} />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">🔑 รหัสสินค้า (Auto)</label>
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">🔑 รหัสบาร์โค้ด</label>
                 <div className="flex gap-2">
-                  <input value={form.barcode_id} onChange={e => setF('barcode_id')(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-800 font-mono outline-none focus:border-indigo-400 focus:bg-white transition-all text-sm flex-1" placeholder="กดรีเฟรช →" />
-                  <button type="button" onClick={() => generateId(form.brand, selectedType?.id)} className="px-4 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-xl transition-all active:scale-90 shadow-sm">
+                  <input value={form.barcode_id} onChange={e => setF('barcode_id')(e.target.value)} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-gray-800 font-mono outline-none focus:border-indigo-400 focus:bg-white transition-all text-sm flex-1" placeholder="Auto..." />
+                  <button type="button" onClick={() => generateId(form.brand, selectedType?.id)} className="px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl transition-all active:scale-90">
                     <RefreshCw className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-              <Input label="หมายเหตุ" value={form.description} onChange={setF('description')} placeholder="รายละเอียดเพิ่มเติม..." />
             </div>
           )}
 
           {/* STEP 3 */}
           {step === 3 && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {selectedType?.measureType === 'top' && (
                 <>
-                  <div className="text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3">👕 วัดขนาดเสื้อ (หน่วย: นิ้ว)</div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Select label="ไซส์ผ้าย" value={form.size} onChange={setF('size')} options={SIZES_CLOTHING} />
-                    <Input label="อก (นิ้ว)" value={form.chest_width} onChange={setF('chest_width')} type="number" step="0.5" placeholder="21" />
-                    <Input label="ความยาวเสื้อ" value={form.total_length} onChange={setF('total_length')} type="number" step="0.5" placeholder="28" />
-                    <Input label="ความยาวแขน" value={form.sleeve_length} onChange={setF('sleeve_length')} type="number" step="0.5" placeholder="24" />
-                    <Input label="ไหล่กว้าง" value={form.shoulder_width} onChange={setF('shoulder_width')} type="number" step="0.5" placeholder="16" />
-                    <Input label="เอว (ถ้ามี)" value={form.waist_size} onChange={setF('waist_size')} type="number" step="0.5" placeholder="-" />
+                  <div className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest pl-1">👕 ขนาดเสื้อ (นิ้ว)</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select label="ไซส์" value={form.size} onChange={setF('size')} options={SIZES_CLOTHING} />
+                    <Input label="อก" value={form.chest_width} onChange={setF('chest_width')} type="number" step="0.5" placeholder="0.0" />
+                    <Input label="ยาวเสื้อ" value={form.total_length} onChange={setF('total_length')} type="number" step="0.5" placeholder="0.0" />
+                    <Input label="ยาวแขน" value={form.sleeve_length} onChange={setF('sleeve_length')} type="number" step="0.5" placeholder="0.0" />
+                    <Input label="ไหล่" value={form.shoulder_width} onChange={setF('shoulder_width')} type="number" step="0.5" placeholder="0.0" />
+                    <Input label="เอว" value={form.waist_size} onChange={setF('waist_size')} type="number" step="0.5" placeholder="-" />
                   </div>
                 </>
               )}
               {selectedType?.measureType === 'bottom' && (
                 <>
-                  <div className="text-sm font-semibold text-violet-700 bg-violet-50 border border-violet-100 rounded-xl px-4 py-3">👖 วัดขนาดกางเกง/กระโปรง (หน่วย: นิ้ว)</div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="text-[10px] font-bold text-violet-500 uppercase tracking-widest pl-1">👖 ขนาดกางเกง (นิ้ว)</div>
+                  <div className="grid grid-cols-2 gap-2">
                     <Select label="ไซส์" value={form.size} onChange={setF('size')} options={SIZES_CLOTHING} />
-                    <Input label="รอบเอว" value={form.waist_size} onChange={setF('waist_size')} type="number" step="0.5" placeholder="30" />
-                    <Input label="ความยาวขา" value={form.total_length} onChange={setF('total_length')} type="number" step="0.5" placeholder="42" />
-                    <Input label="ต้นขา" value={form.chest_width} onChange={setF('chest_width')} type="number" step="0.5" placeholder="22" />
+                    <Input label="เอว" value={form.waist_size} onChange={setF('waist_size')} type="number" step="0.5" placeholder="0.0" />
+                    <Input label="ยาวขา" value={form.total_length} onChange={setF('total_length')} type="number" step="0.5" placeholder="0.0" />
+                    <Input label="สะโพก/ต้นขา" value={form.chest_width} onChange={setF('chest_width')} type="number" step="0.5" placeholder="0.0" />
                   </div>
                 </>
               )}
               {selectedType?.measureType === 'shoe' && (
                 <>
-                  <div className="text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">👟 ขนาดรองเท้า — ใส่อย่างน้อย 1 ระบบ</div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="text-[10px] font-bold text-amber-500 uppercase tracking-widest pl-1">👟 ขนาดรองเท้า</div>
+                  <div className="grid grid-cols-3 gap-2">
                     <Select label="EU" value={form.size_eu} onChange={setF('size_eu')} options={SHOE_SIZES_EU} placeholder="EU" />
-                    <Input label="US" value={form.size_us} onChange={setF('size_us')} type="number" placeholder="9" />
-                    <Input label="UK" value={form.size_uk} onChange={setF('size_uk')} type="number" placeholder="8" />
+                    <Input label="US" value={form.size_us} onChange={setF('size_us')} type="number" placeholder="US" />
+                    <Input label="UK" value={form.size_uk} onChange={setF('size_uk')} type="number" placeholder="UK" />
                   </div>
-                  <Input label="ความยาวพื้นใน (CM)" value={form.insole_cm} onChange={setF('insole_cm')} type="number" step="0.5" placeholder="เช่น 27.5" />
+                  <Input label="พื้นใน (CM)" value={form.insole_cm} onChange={setF('insole_cm')} type="number" step="0.5" placeholder="0.0" />
                 </>
               )}
-              {selectedType?.measureType === 'none' && (
-                <div className="py-10 text-center text-gray-400 font-semibold text-sm">ไม่มีมาตรวัดสำหรับประเภทนี้</div>
-              )}
+              <Input label="หมายเหตุ/ตำหนิ" value={form.description} onChange={setF('description')} placeholder="รายละเอียดเพิ่มเติม..." />
             </div>
           )}
 
           {/* STEP 4 */}
           {step === 4 && (
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 md:grid-cols-3 gap-1.5">
                 {uploadedImages.map((url, i) => (
-                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 group">
+                  <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-gray-100 group">
                     <img src={url} className="w-full h-full object-cover" alt="uploaded" />
                     <button
                       type="button"
                       onClick={() => setUploadedImages(p => p.filter((_, j) => j !== i))}
-                      className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      className="absolute top-0.5 right-0.5 p-1 bg-red-500 text-white rounded-md opacity-0 md:group-hover:opacity-100 transition-opacity"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-2.5 h-2.5" />
                     </button>
-                    {i === 0 && <span className="absolute bottom-1 left-1 text-[8px] font-black bg-indigo-500 text-white px-1.5 py-0.5 rounded-md shadow-sm">หลัก</span>}
+                    {i === 0 && <span className="absolute bottom-0.5 left-0.5 text-[7px] font-black bg-indigo-500 text-white px-1 py-0.5 rounded-sm shadow-sm">หลัก</span>}
                   </div>
                 ))}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadLoading}
-                  className="aspect-square rounded-xl border-2 border-dashed border-gray-200 hover:border-indigo-400 bg-gray-50 hover:bg-indigo-50 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+                  className="aspect-square rounded-lg border-2 border-dashed border-gray-100 hover:border-indigo-400 bg-gray-50 flex flex-col items-center justify-center gap-1 transition-all active:scale-95 disabled:opacity-50"
                 >
-                  {uploadLoading ? <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" /> : <Camera className="w-6 h-6 text-gray-300" />}
-                  <span className="text-[10px] font-bold text-gray-400">อัปโหลดรูป</span>
+                  {uploadLoading ? <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" /> : <Camera className="w-5 h-5 text-gray-300" />}
+                  <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter">เพิ่มรูป</span>
                 </button>
                 <input type="file" hidden ref={fileInputRef} onChange={handleFileUpload} accept="image/*" />
               </div>
