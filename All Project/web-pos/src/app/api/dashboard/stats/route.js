@@ -1,4 +1,4 @@
-// export const runtime = 'edge';
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 import { success, error, serverError } from '@/lib/api-response';

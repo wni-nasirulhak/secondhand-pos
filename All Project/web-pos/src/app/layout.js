@@ -3,8 +3,6 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 
-export const runtime = "edge";
-
 const prompt = Prompt({
   subsets: ["thai", "latin"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],

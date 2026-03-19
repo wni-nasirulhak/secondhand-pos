@@ -51,8 +51,8 @@
 - [ ] ปรับแก้ UI ให้รองรับ Mobile 100%
 
 ### 4. Deployment
-- [x] Configure Environment Variables and Edge Runtime compatibility
-- [/] Test Cloudflare Deployment (Build verified, waiting for final manual deploy)
+- [/] ตั้งค่า Cloudflare Pages และเช็ค Environment Variables (Cloudinary Preset Added)
+- [ ] ทดสอบระบบบน Production จริง
 
 ---
 

@@ -1,3 +1,7 @@
+import sqlite3 from 'better-sqlite3';
+import path from 'path';
+import fs from 'fs';
+
 let localDb = null;
 
 export async function getDB() {
@@ -5,15 +9,10 @@ export async function getDB() {
   if (typeof process !== 'undefined' && process.env.DB) {
     return process.env.DB;
   }
-  
+
   // Local Fallback for next dev
   if (!localDb) {
     try {
-      // Dynamic imports for native modules to avoid Edge runtime errors during build
-      const sqlite3 = (await import('better-sqlite3')).default;
-      const path = (await import('path')).default;
-      const fs = (await import('fs')).default;
-
       // Find the local wrangler D1 sqlite file
       const d1Path = path.join(process.cwd(), '.wrangler', 'state', 'v3', 'd1', 'miniflare-D1DatabaseObject');
       if (fs.existsSync(d1Path)) {
@@ -24,7 +23,7 @@ export async function getDB() {
           console.log('Connected to local D1 SQLite:', sqliteFile);
         }
       }
-      
+
       // If still not found, use a default local.db
       if (!localDb) {
         localDb = new sqlite3('local.db');
@@ -35,7 +34,7 @@ export async function getDB() {
       return null;
     }
   }
-  
+
   // Mock D1 Interface for better-sqlite3
   return {
     prepare: (sql) => {
