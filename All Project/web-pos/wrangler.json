@@ -1,6 +1,6 @@
 {
-	"name": "thrift-shop-pos",
-	"pages_build_output_dir": ".vercel/output/static",
+	"name": "secondhan-pos",
+	"pages_build_output_dir": ".vercel/output",
 	"compatibility_date": "2024-11-01",
 	"compatibility_flags": [
 		"nodejs_compat"
@@ -8,13 +8,13 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "thrift-db",
-			"database_id": "thrift-db-id"
+			"database_name": "secondhan-pos",
+			"database_id": "WILL_BE_UPDATED_BY_SCRIPT"
 		},
 		{
-			"binding": "secondhand_pos",
-			"database_name": "thrift-db",
-			"database_id": "5371965d-9756-4211-9cce-7d7e12eea3bc",
+			"binding": "secondhan_pos",
+			"database_name": "secondhan-pos",
+			"database_id": "df27b4c5-db62-4b87-ba6b-4ab99ee23788",
 			"remote": true
 		}
 	]
