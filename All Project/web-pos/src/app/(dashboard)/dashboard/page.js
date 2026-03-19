@@ -112,19 +112,19 @@ export default function DashboardPage() {
   }, [dashboardData]);
 
   const chartData = useMemo(() => {
-    if (!dashboardData) return [];
+    if (!dashboardData || !Array.isArray(dashboardData.revenueByDay)) return [];
     return dashboardData.revenueByDay.map(d => ({
-      name: d.date.split('-').slice(1).join('/'),
-      total: d.total
+      name: d.date ? d.date.split('-').slice(1).join('/') : 'N/A',
+      total: d.total || 0
     }));
   }, [dashboardData, salesLimit, currentPage]);
 
   const totalPages = Math.ceil(salesCount / salesLimit);
 
   const categoryBarData = useMemo(() => {
-    if (!dashboardData) return [];
+    if (!dashboardData || !Array.isArray(dashboardData.revenueByCategory)) return [];
     return dashboardData.revenueByCategory.map(c => ({
-      name: c.category,
+      name: c.category || 'Unknown',
       cost: c.total_cost || 0,
       profit: Math.max(0, (c.total_revenue || 0) - (c.total_cost || 0))
     })).slice(0, 8);
@@ -313,7 +313,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-5">
-            {dashboardData?.topBrands.slice(0, 6).map((brand, i) => (
+            {(dashboardData?.topBrands || []).slice(0, 6).map((brand, i) => (
               <div key={i} className="group flex items-center gap-4">
                 <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-400 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-sm">
                   {i + 1}
