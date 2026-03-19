@@ -1,0 +1,37 @@
+{
+  "tiktok": {
+    "url": "https://www.tiktok.com/@acheglzz/live",
+    "scrape_interval_seconds": 3,
+    "headless": false
+  },
+  "webhook": {
+    "enabled": true,
+    "url": "YOUR_WEBHOOK_URL_HERE",
+    "send_on_new_comment": true,
+    "batch_send": false
+  },
+  "storage": {
+    "data_dir": "data/comments",
+    "filename_pattern": "%Y-%m-%d.json"
+  },
+  "selectors": {
+    "comment_container": [
+      "[data-e2e=\"comment-item\"]",
+      ".comment-item",
+      "[class*=\"Comment\"]",
+      "[class*=\"comment\"]"
+    ],
+    "username": [
+      "[data-e2e=\"comment-username\"]",
+      ".comment-username",
+      "[class*=\"Username\"]",
+      "[class*=\"username\"]"
+    ],
+    "text": [
+      "[data-e2e=\"comment-text\"]",
+      ".comment-text-content",
+      "[class*=\"CommentText\"]",
+      "[class*=\"comment-text\"]"
+    ]
+  }
+}
