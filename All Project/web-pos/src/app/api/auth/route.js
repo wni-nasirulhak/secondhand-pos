@@ -1,3 +1,6 @@
+﻿export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 import { success, error, serverError } from '@/lib/api-response';
 import { SignJWT } from 'jose';
 
@@ -29,7 +32,7 @@ export async function POST(req) {
       return response;
     }
 
-    return error('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 401);
+    return error('à¸Šà¸·à¹ˆà¸­à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸«à¸£à¸·à¸­à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™à¹„à¸¡à¹ˆà¸–à¸¹à¸à¸•à¹‰à¸­à¸‡', 401);
   } catch (err) {
     return serverError(err);
   }
@@ -40,3 +43,5 @@ export async function DELETE() {
   response.cookies.delete('token');
   return response;
 }
+
+

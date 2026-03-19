@@ -112,19 +112,19 @@ export default function DashboardPage() {
   }, [dashboardData]);
 
   const chartData = useMemo(() => {
-    if (!dashboardData) return [];
+    if (!dashboardData || !dashboardData.revenueByDay) return [];
     return dashboardData.revenueByDay.map(d => ({
-      name: d.date.split('-').slice(1).join('/'),
-      total: d.total
+      name: d.date?.split('-').slice(1).join('/') || '',
+      total: d.total || 0
     }));
   }, [dashboardData, salesLimit, currentPage]);
 
   const totalPages = Math.ceil(salesCount / salesLimit);
 
   const categoryBarData = useMemo(() => {
-    if (!dashboardData) return [];
+    if (!dashboardData || !dashboardData.revenueByCategory) return [];
     return dashboardData.revenueByCategory.map(c => ({
-      name: c.category,
+      name: c.category || 'Other',
       cost: c.total_cost || 0,
       profit: Math.max(0, (c.total_revenue || 0) - (c.total_cost || 0))
     })).slice(0, 8);
@@ -313,7 +313,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-5">
-            {dashboardData?.topBrands.slice(0, 6).map((brand, i) => (
+            {dashboardData?.topBrands?.slice(0, 6).map((brand, i) => (
               <div key={i} className="group flex items-center gap-4">
                 <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-400 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-sm">
                   {i + 1}
@@ -321,18 +321,18 @@ export default function DashboardPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center mb-1.5">
                     <span className="text-sm font-bold text-slate-700 truncate pr-2">{brand.name}</span>
-                    <span className="text-xs font-black text-slate-900">฿{brand.total_revenue.toLocaleString()}</span>
+                    <span className="text-xs font-black text-slate-900">฿{(brand.total_revenue || 0).toLocaleString()}</span>
                   </div>
                   <div className="w-full h-1.5 bg-slate-50 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-indigo-400 rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: i === 0 ? '100%' : Math.max(10, (brand.total_revenue / dashboardData.topBrands[0].total_revenue) * 100) + '%' }}
+                      style={{ width: i === 0 ? '100%' : Math.max(10, ((brand.total_revenue || 0) / (dashboardData.topBrands[0]?.total_revenue || 1)) * 100) + '%' }}
                     ></div>
                   </div>
                 </div>
               </div>
             ))}
-            {(!dashboardData || dashboardData.topBrands.length === 0) && (
+            {(!dashboardData || !dashboardData.topBrands || dashboardData.topBrands.length === 0) && (
               <div className="py-20 text-center flex flex-col items-center gap-3 opacity-20">
                 <BarChart3 className="w-12 h-12" />
                 <p className="text-sm font-bold">No brand data available</p>

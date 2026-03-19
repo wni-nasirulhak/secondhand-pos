@@ -1,7 +1,8 @@
+﻿export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { execute, prepare, batch } from '@/lib/db';
-
-// export const runtime = 'edge';
 
 export async function POST(req) {
   try {
@@ -45,3 +46,4 @@ export async function POST(req) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

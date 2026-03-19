@@ -1,3 +1,6 @@
+﻿export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 import { query } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
@@ -20,3 +23,5 @@ export async function GET() {
     return NextResponse.json({ error: err.message, stack: err.stack });
   }
 }
+
+

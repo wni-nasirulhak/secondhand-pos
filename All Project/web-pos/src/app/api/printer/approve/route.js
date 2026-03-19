@@ -1,3 +1,6 @@
+﻿export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 import { success, error, serverError } from '@/lib/api-response';
 import { batch, prepare } from '@/lib/db';
 
@@ -28,3 +31,5 @@ export async function POST(req) {
     return serverError(err);
   }
 }
+
+

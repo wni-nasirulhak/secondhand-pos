@@ -1,3 +1,6 @@
+﻿export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 import { success, error, serverError } from '@/lib/api-response';
 import { getFirst, prepare, batch } from '@/lib/db';
 
@@ -35,7 +38,7 @@ export async function POST(req) {
       if (customer) {
         // Validation: check if points are enough
         if (pointsUsed > 0 && (customer.points || 0) < pointsUsed) {
-          return error(`ลูกค้ามีแต้มไม่ถึง (มี ${customer.points} แต้ม)`);
+          return error(`à¸¥à¸¹à¸à¸„à¹‰à¸²à¸¡à¸µà¹à¸•à¹‰à¸¡à¹„à¸¡à¹ˆà¸–à¸¶à¸‡ (à¸¡à¸µ ${customer.points} à¹à¸•à¹‰à¸¡)`);
         }
 
         customerId = customer.id;
@@ -103,3 +106,5 @@ export async function POST(req) {
     return serverError(err);
   }
 }
+
+

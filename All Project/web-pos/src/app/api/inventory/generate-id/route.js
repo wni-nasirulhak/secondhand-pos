@@ -1,23 +1,26 @@
+﻿export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
 // Type codes mapping
 const TYPE_CODES = {
-  'เสื้อ': 'SHIRT',
+  'à¹€à¸ªà¸·à¹‰à¸­': 'SHIRT',
   'shirt': 'SHIRT',
-  'กางเกง': 'PANT',
+  'à¸à¸²à¸‡à¹€à¸à¸‡': 'PANT',
   'pant': 'PANT',
-  'รองเท้า': 'SHOE',
+  'à¸£à¸­à¸‡à¹€à¸—à¹‰à¸²': 'SHOE',
   'shoe': 'SHOE',
-  'เสื้อกันหนาว': 'JACK',
+  'à¹€à¸ªà¸·à¹‰à¸­à¸à¸±à¸™à¸«à¸™à¸²à¸§': 'JACK',
   'jacket': 'JACK',
-  'กระโปรง': 'SKIRT',
+  'à¸à¸£à¸°à¹‚à¸›à¸£à¸‡': 'SKIRT',
   'skirt': 'SKIRT',
-  'อุปกรณ์': 'ACC',
+  'à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ': 'ACC',
   'accessories': 'ACC',
-  'ชุดเดรส': 'DRESS',
+  'à¸Šà¸¸à¸”à¹€à¸”à¸£à¸ª': 'DRESS',
   'dress': 'DRESS',
-  'อื่นๆ': 'ITEM',
+  'à¸­à¸·à¹ˆà¸™à¹†': 'ITEM',
   'other': 'ITEM',
 };
 
@@ -62,3 +65,5 @@ export async function GET(req) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+

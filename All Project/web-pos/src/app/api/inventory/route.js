@@ -1,7 +1,8 @@
+﻿export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 import { success, error, serverError } from '@/lib/api-response';
 import { query, prepare } from '@/lib/db';
-
-// export const runtime = 'edge';
 
 export async function GET() {
   try {
@@ -60,7 +61,7 @@ export async function POST(req) {
     // 3. Insert specialized details
     const catLower = (category_name || '').toLowerCase();
     
-    if (clothing && (catLower.includes('clothing') || catLower.includes('shirt') || catLower.includes('pant') || catLower.includes('เสื้อ') || catLower.includes('กางเกง'))) {
+    if (clothing && (catLower.includes('clothing') || catLower.includes('shirt') || catLower.includes('pant') || catLower.includes('à¹€à¸ªà¸·à¹‰à¸­') || catLower.includes('à¸à¸²à¸‡à¹€à¸à¸‡'))) {
       await (await prepare(
         `INSERT INTO clothing_details (
           product_id, size, chest_width, waist_size, sleeve_length, shoulder_width, total_length, condition, material, color
@@ -70,7 +71,7 @@ export async function POST(req) {
           clothing.shoulder_width, clothing.total_length, clothing.condition, clothing.material, clothing.color
         ]
       )).run();
-    } else if (shoes && (catLower.includes('shoe') || catLower.includes('sneaker') || catLower.includes('รองเท้า'))) {
+    } else if (shoes && (catLower.includes('shoe') || catLower.includes('sneaker') || catLower.includes('à¸£à¸­à¸‡à¹€à¸—à¹‰à¸²'))) {
       await (await prepare(
         `INSERT INTO shoe_details (
           product_id, size_eu, size_us, size_uk, insole_cm, condition, material, color
@@ -119,7 +120,7 @@ export async function PUT(req) {
     // 3. Update specialized details
     const catLower = (category_name || '').toLowerCase();
     
-    if (clothing && (catLower.includes('clothing') || catLower.includes('shirt') || catLower.includes('pant') || catLower.includes('เสื้อ') || catLower.includes('กางเกง'))) {
+    if (clothing && (catLower.includes('clothing') || catLower.includes('shirt') || catLower.includes('pant') || catLower.includes('à¹€à¸ªà¸·à¹‰à¸­') || catLower.includes('à¸à¸²à¸‡à¹€à¸à¸‡'))) {
       await (await prepare('DELETE FROM shoe_details WHERE product_id = ?', [id])).run(); // Clean up if type changed
       await (await prepare(
         `INSERT INTO clothing_details (
@@ -135,7 +136,7 @@ export async function PUT(req) {
           clothing.shoulder_width, clothing.total_length, clothing.condition, clothing.material, clothing.color
         ]
       )).run();
-    } else if (shoes && (catLower.includes('shoe') || catLower.includes('sneaker') || catLower.includes('รองเท้า'))) {
+    } else if (shoes && (catLower.includes('shoe') || catLower.includes('sneaker') || catLower.includes('à¸£à¸­à¸‡à¹€à¸—à¹‰à¸²'))) {
       await (await prepare('DELETE FROM clothing_details WHERE product_id = ?', [id])).run(); // Clean up if type changed
       await (await prepare(
         `INSERT INTO shoe_details (
@@ -174,3 +175,4 @@ export async function PATCH(req) {
     return serverError(err);
   }
 }
+

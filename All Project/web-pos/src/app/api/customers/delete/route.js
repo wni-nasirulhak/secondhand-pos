@@ -1,3 +1,6 @@
+﻿export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { getFirst, prepare, batch } from '@/lib/db';
 
@@ -31,3 +34,5 @@ export async function POST(req) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+

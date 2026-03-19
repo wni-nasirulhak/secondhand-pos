@@ -1,3 +1,6 @@
+﻿export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 import { success, serverError } from '@/lib/api-response';
 import { prepare } from '@/lib/db';
 
@@ -17,3 +20,4 @@ export async function GET() {
     return serverError(err);
   }
 }
+
