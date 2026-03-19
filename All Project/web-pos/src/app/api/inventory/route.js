@@ -1,7 +1,7 @@
 import { success, error, serverError } from '@/lib/api-response';
 import { query, prepare } from '@/lib/db';
 
-// export const runtime = 'nodejs';
+// export const runtime = 'edge';
 
 export async function GET() {
   try {
