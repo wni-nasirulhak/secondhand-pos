@@ -8,6 +8,10 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "main": ".vercel/output/static/_worker.js",
+  "assets": {
+    "directory": ".vercel/output/static"
+  },
   "d1_databases": [
     {
       "binding": "DB",
