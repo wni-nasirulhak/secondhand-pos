@@ -180,21 +180,34 @@ export class ConfigForm {
                         <span class="label-icon">🍪</span>
                         จัดการคุกกี้ (Manual Cookie Import)
                     </label>
-                    
-                    <div id="cookie-status" style="margin: 10px 0; padding: 10px; border-radius: 8px; display: none;">
+
+                    <div class="cookie-platform-selector" style="display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap;">
+                        <div class="platform-badge-mini active" data-cookie-platform="tiktok">TikTok</div>
+                        <div class="platform-badge-mini" data-cookie-platform="shopee">Shopee</div>
+                        <div class="platform-badge-mini" data-cookie-platform="lazada">Lazada</div>
+                        <div class="platform-badge-mini" data-cookie-platform="facebook">FB</div>
+                        <div class="platform-badge-mini" data-cookie-platform="instagram">IG</div>
+                        <div class="platform-badge-mini" data-cookie-platform="youtube">YT</div>
+                    </div>
+
+                    <div id="cookie-status" style="margin: 10px 0; padding: 12px; border-radius: 8px; font-size: 13px; display: none;">
                         <!-- Status will be inserted here -->
                     </div>
-                    
+
+                    <div id="cookie-detection-alert" style="display: none; background: rgba(108, 92, 231, 0.1); border: 1px dashed #6c5ce7; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; color: #a29bfe;">
+                        ✨ ตรวจพบว่าเป็นคุกกี้ของ <strong id="detected-platform-name">...</strong> สลับให้แล้ว!
+                    </div>
+
                     <textarea 
                         id="cookie-json" 
                         placeholder='วาง JSON คุกกี้ที่นี่... (เช่น [{"name": "sessionid", ...}])'
-                        style="width: 100%; height: 80px; margin-top: 10px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); padding: 10px; font-family: monospace; font-size: 12px;"
+                        style="width: 100%; height: 100px; margin-top: 5px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); padding: 10px; font-family: monospace; font-size: 11px;"
                     ></textarea>
-                    <button type="button" id="btn-import-cookies" class="btn btn-small" style="width: 100%; margin-top: 10px; background: #6c5ce7; color: white;">
-                        📥 นำเข้าคุกกี้ (Save to StorageState)
+                    <button type="button" id="btn-import-cookies" class="btn btn-small" style="width: 100%; margin-top: 10px; background: #6c5ce7; color: white; font-weight: 600;">
+                        📥 นำเข้าคุกกี้ (บันทึกสำหรับ <span id="current-import-platform">tiktok</span>)
                     </button>
-                    <small style="display: block; margin-top: 5px;">
-                        💡 ก๊อปปี้ JSON จาก EditThisCookie มาวางแล้วกดปุ่มนำเข้า
+                    <small style="display: block; margin-top: 8px; opacity: 0.7;">
+                        💡 แนะนำ: ใช้ Extension "EditThisCookie" แล้ว Export เป็น JSON มาวาง
                     </small>
                 </div>
 
@@ -382,8 +395,73 @@ export class ConfigForm {
             });
         }
 
-        // Import Cookies button
+        // Import Cookies Logic
         const btnImportCookies = this.container.querySelector('#btn-import-cookies');
+        const cookieJsonArea = this.container.querySelector('#cookie-json');
+        const cookieBadges = this.container.querySelectorAll('.platform-badge-mini');
+        const currentPlatLabel = this.container.querySelector('#current-import-platform');
+        const detectionAlert = this.container.querySelector('#cookie-detection-alert');
+        const detectedLabel = this.container.querySelector('#detected-platform-name');
+        
+        this.currentCookiePlatform = 'tiktok';
+
+        // Platform Switch in Cookie Manager
+        cookieBadges.forEach(badge => {
+            badge.addEventListener('click', () => {
+                const platform = badge.dataset.cookiePlatform;
+                this.currentCookiePlatform = platform;
+                
+                cookieBadges.forEach(b => b.classList.toggle('active', b.dataset.cookiePlatform === platform));
+                if (currentPlatLabel) currentPlatLabel.textContent = platform;
+                
+                this.checkCookieStatus(platform);
+            });
+        });
+
+        // Auto Detection from Clipboard paste
+        if (cookieJsonArea) {
+            cookieJsonArea.addEventListener('input', (e) => {
+                const val = e.target.value.trim();
+                if (!val) {
+                    if (detectionAlert) detectionAlert.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    let cookies = JSON.parse(val);
+                    if (!Array.isArray(cookies) && cookies.cookies) cookies = cookies.cookies;
+                    if (!Array.isArray(cookies)) return;
+
+                    // Find sample domain
+                    const sample = cookies.find(c => c.domain);
+                    if (sample) {
+                        const domain = sample.domain.toLowerCase();
+                        let detected = '';
+                        if (domain.includes('tiktok.com')) detected = 'tiktok';
+                        else if (domain.includes('shopee')) detected = 'shopee';
+                        else if (domain.includes('lazada')) detected = 'lazada';
+                        else if (domain.includes('facebook.com')) detected = 'facebook';
+                        else if (domain.includes('instagram.com')) detected = 'instagram';
+                        else if (domain.includes('youtube.com') || domain.includes('youtu.be')) detected = 'youtube';
+
+                        if (detected && detected !== this.currentCookiePlatform) {
+                            this.currentCookiePlatform = detected;
+                            cookieBadges.forEach(b => b.classList.toggle('active', b.dataset.cookiePlatform === detected));
+                            if (currentPlatLabel) currentPlatLabel.textContent = detected;
+                            
+                            if (detectionAlert && detectedLabel) {
+                                detectedLabel.textContent = detected.toUpperCase();
+                                detectionAlert.style.display = 'block';
+                            }
+                            this.checkCookieStatus(detected);
+                        }
+                    }
+                } catch (e) {
+                    // Not valid JSON yet, ignore
+                }
+            });
+        }
+
         if (btnImportCookies) {
             btnImportCookies.addEventListener('click', () => {
                 this.handleImportCookies();
@@ -423,28 +501,22 @@ export class ConfigForm {
         updateModeStyles(); // Initial style
     }
 
-    async checkCookieStatus() {
+    async checkCookieStatus(platform = 'tiktok') {
         const statusDiv = this.container.querySelector('#cookie-status');
-        if (!statusDiv) {
-            console.warn('Cookie status div not found');
-            return;
-        }
+        if (!statusDiv) return;
 
-        console.log('🍪 Checking cookie status...');
+        console.log(`🍪 Checking ${platform} cookie status...`);
 
         try {
-            const response = await fetch('/api/check-cookies');
-            const data = await response.json();
-            
-            console.log('🍪 Cookie status:', data);
+            const data = await this.api.checkCookies(platform);
             
             if (data.exists) {
                 if (data.valid) {
                     statusDiv.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 24px;">✅</span>
+                            <span style="font-size: 20px;">✅</span>
                             <div>
-                                <strong style="color: #00d97e;">คุกกี้พร้อมใช้งาน!</strong>
+                                <strong style="color: #00d97e;">คุกกี้ ${platform.toUpperCase()} พร้อมใช้งาน!</strong>
                                 <br>
                                 <small style="color: var(--text-secondary);">มี ${data.cookieCount} คุกกี้ | หมดอายุ: ${data.expiryDate || 'ไม่ระบุ'}</small>
                             </div>
@@ -455,47 +527,43 @@ export class ConfigForm {
                 } else {
                     statusDiv.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 24px;">⚠️</span>
+                            <span style="font-size: 20px;">⚠️</span>
                             <div>
-                                <strong style="color: #f46a6a;">คุกกี้หมดอายุแล้ว!</strong>
+                                <strong style="color: #f46a6a;">คุกกี้ ${platform.toUpperCase()} หมดอายุแล้ว!</strong>
                                 <br>
-                                <small style="color: var(--text-secondary);">กรุณาไปก็อปคุกกี้ใหม่จาก TikTok แล้ววางด้านล่าง</small>
+                                <small style="color: var(--text-secondary);">กรุณานำเข้าคุกกี้ใหม่เพื่อใช้โหมด StorageState</small>
                             </div>
                         </div>
                     `;
                     statusDiv.style.background = 'rgba(244, 106, 106, 0.1)';
                     statusDiv.style.border = '1px solid rgba(244, 106, 106, 0.3)';
                 }
-                statusDiv.style.display = 'block';
             } else {
                 statusDiv.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 24px;">ℹ️</span>
+                        <span style="font-size: 20px;">ℹ️</span>
                         <div>
-                            <strong style="color: #25f4ee;">ยังไม่มีคุกกี้</strong>
+                            <strong style="color: #25f4ee;">ยังไม่มีคุกกี้ ${platform.toUpperCase()}</strong>
                             <br>
-                            <small style="color: var(--text-secondary);">กรุณานำเข้าคุกกี้จาก TikTok ด้านล่าง</small>
+                            <small style="color: var(--text-secondary);">กรุณาวาง JSON แล้วกด "นำเข้าคุกกี้"</small>
                         </div>
                     </div>
                 `;
                 statusDiv.style.background = 'rgba(37, 244, 238, 0.1)';
                 statusDiv.style.border = '1px solid rgba(37, 244, 238, 0.3)';
-                statusDiv.style.display = 'block';
             }
+            statusDiv.style.display = 'block';
         } catch (error) {
             console.error('❌ Error checking cookie status:', error);
-            statusDiv.innerHTML = `
-                <div style="text-align: center; color: var(--text-secondary);">
-                    ⚠️ ไม่สามารถตรวจสอบสถานะได้
-                </div>
-            `;
-            statusDiv.style.display = 'block';
+            statusDiv.style.display = 'none';
         }
     }
 
     async handleImportCookies() {
         const textarea = this.container.querySelector('#cookie-json');
         const btn = this.container.querySelector('#btn-import-cookies');
+        const detectionAlert = this.container.querySelector('#cookie-detection-alert');
+        const platform = this.currentCookiePlatform || 'tiktok';
         
         if (!textarea || !textarea.value.trim()) {
             this.showNotification('❌ กรุณาใส่ JSON คุกกี้', 'error');
@@ -508,13 +576,14 @@ export class ConfigForm {
         }
 
         btn.disabled = true;
-        btn.textContent = '⏳ กำลังนำเข้า...';
+        btn.textContent = `⏳ กำลังนำเข้า ${platform}...`;
 
         try {
-            const result = await this.api.importCookies(textarea.value.trim());
+            const result = await this.api.importCookies(textarea.value.trim(), platform);
             if (result.success) {
-                this.showNotification('✅ ' + result.message, 'success');
+                this.showNotification(`✅ นำเข้าคุกกี้ ${platform} สำเร็จ!`, 'success');
                 textarea.value = ''; // ล้างช่อง
+                if (detectionAlert) detectionAlert.style.display = 'none';
                 
                 // เปลี่ยนโหมดเป็น StorageState อัตโนมัติ
                 const authModeSelect = this.container.querySelector('#auth-mode');
@@ -523,13 +592,11 @@ export class ConfigForm {
                 }
                 
                 // รอให้ไฟล์ถูกเขียนเสร็จแล้วค่อย check status
-                btn.textContent = '⏳ กำลังตรวจสอบ...';
-                await new Promise(resolve => setTimeout(resolve, 500));
+                btn.textContent = '⏳ ตรวจสอบสถานะ...';
+                await new Promise(resolve => setTimeout(resolve, 800));
                 
                 // Check status again after import
-                await this.checkCookieStatus();
-                
-                this.showNotification('🎉 นำเข้าและตรวจสอบเสร็จแล้ว!', 'success');
+                await this.checkCookieStatus(platform);
             } else {
                 throw new Error(result.error || 'ไม่สามารถนำเข้าคุกกี้ได้');
             }
@@ -537,7 +604,7 @@ export class ConfigForm {
             this.showNotification('❌ ' + error.message, 'error');
         } finally {
             btn.disabled = false;
-            btn.textContent = '📥 นำเข้าคุกกี้ (Save to StorageState)';
+            btn.textContent = `📥 นำเข้าคุกกี้ (บันทึกสำหรับ ${platform})`;
         }
     }
 

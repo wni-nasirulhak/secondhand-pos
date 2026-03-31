@@ -58,15 +58,20 @@ function loadMockRules() {
     }
 }
 
-// Initial load
-loadMockRules();
+// Watch rules file for changes
+const rulesPath = path.join(__dirname, '..', 'data', 'mock_rules.json');
+if (fs.existsSync(rulesPath)) {
+    fs.watch(rulesPath, (eventType) => {
+        if (eventType === 'change') {
+            console.log('🔄 Mock rules file changed, reloading...');
+            loadMockRules();
+        }
+    });
+}
 
 function generateMockReply(username, comment) {
     if (!comment) return null;
     const lower = comment.toLowerCase().trim();
-
-    // Reload rules on each request for simplicity (small file)
-    loadMockRules();
 
     // 1. Skip join/system messages
     if (config.skipJoinMessages) {

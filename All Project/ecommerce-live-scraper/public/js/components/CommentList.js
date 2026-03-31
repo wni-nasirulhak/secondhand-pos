@@ -355,6 +355,11 @@ export class CommentList {
         this.clearFilters();
     }
 
+    setComments(comments) {
+        this.comments = comments || [];
+        this.applyFilters();
+    }
+
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;

@@ -71,11 +71,16 @@ export class API {
     }
 
     // นำเข้า cookies
-    async importCookies(cookiesJson) {
+    async importCookies(cookiesJson, platform = 'tiktok') {
         return this.request('/api/import-cookies', {
             method: 'POST',
-            body: JSON.stringify({ cookiesJson })
+            body: JSON.stringify({ cookiesJson, platform })
         });
+    }
+
+    // ตรวจสอบสถานะ cookies
+    async checkCookies(platform = 'tiktok') {
+        return this.request(`/api/check-cookies?platform=${platform}`);
     }
 
     // จัดการ Mock Rules

@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const https = require('https');
 const http = require('http');
+const readline = require('readline');
 
 const app = express();
 const PORT = 3000;
@@ -437,12 +438,13 @@ app.post('/api/start', async (req, res) => {
 // เช็คสถานะคุกกี้
 app.get('/api/check-cookies', async (req, res) => {
     try {
-        const storageStatePath = path.join(__dirname, 'storage-states', 'tiktok.json');
+        const platform = req.query.platform || 'tiktok';
+        const storageStatePath = path.join(__dirname, 'storage-states', `${platform}.json`);
         
-        console.log('🍪 Checking cookies at:', storageStatePath);
+        console.log(`🍪 Checking ${platform} cookies at:`, storageStatePath);
         
         if (!require('fs').existsSync(storageStatePath)) {
-            console.log('🍪 Cookie file not found');
+            console.log(`🍪 ${platform} cookie file not found`);
             return res.json({ exists: false });
         }
         
@@ -493,7 +495,9 @@ app.get('/api/check-cookies', async (req, res) => {
 // นำเข้า cookies จาก UI
 app.post('/api/import-cookies', async (req, res) => {
     try {
-        const { cookiesJson } = req.body;
+        const { cookiesJson, platform: pName } = req.body;
+        const platform = pName || 'tiktok';
+
         if (!cookiesJson) {
             return res.json({ success: false, error: 'กรุณาใส่ JSON คุกกี้' });
         }
@@ -514,6 +518,16 @@ app.post('/api/import-cookies', async (req, res) => {
             return res.json({ success: false, error: 'คุกกี้ต้องเป็น Array ของ Object' });
         }
 
+        // Mapping platform to default domain
+        const domainMap = {
+            tiktok: '.tiktok.com',
+            shopee: '.shopee.co.th',
+            lazada: '.lazada.co.th',
+            facebook: '.facebook.com',
+            instagram: '.instagram.com',
+            youtube: '.youtube.com'
+        };
+
         // Normalize sameSite for Playwright
         const normalizedCookies = cookies.map(c => {
             let sameSite = (c.sameSite || 'Lax').toLowerCase();
@@ -527,7 +541,7 @@ app.post('/api/import-cookies', async (req, res) => {
             return {
                 name: c.name,
                 value: c.value,
-                domain: c.domain || '.tiktok.com',
+                domain: c.domain || domainMap[platform] || '.tiktok.com',
                 path: c.path || '/',
                 expires: c.expirationDate || c.expires || -1,
                 httpOnly: c.httpOnly || false,
@@ -542,8 +556,8 @@ app.post('/api/import-cookies', async (req, res) => {
         };
 
         // บันทึกทั้งสองที่เพื่อให้ทำงานได้ทั้ง scraper และ check status
-        const STATE_FILE_1 = path.join(__dirname, 'user-data', 'tiktok_state.json');
-        const STATE_FILE_2 = path.join(__dirname, 'storage-states', 'tiktok.json');
+        const STATE_FILE_1 = path.join(__dirname, 'user-data', `${platform}_state.json`);
+        const STATE_FILE_2 = path.join(__dirname, 'storage-states', `${platform}.json`);
         
         // Ensure directories exist
         const fsSync = require('fs');
@@ -562,7 +576,7 @@ app.post('/api/import-cookies', async (req, res) => {
 
         res.json({ 
             success: true, 
-            message: 'บันทึกคุกกี้สำเร็จ! ตอนนี้คุณสามารถใช้โหมด StorageState ได้แล้ว' 
+            message: `บันทึกคุกกี้สำหรับ ${platform} สำเร็จ! ตอนนี้คุณสามารถใช้โหมด StorageState ได้แล้ว` 
         });
 
     } catch (error) {
@@ -1042,37 +1056,37 @@ async function startScraper(sessionId, url, duration, interval, headless, authMo
 
     console.log(`🚀 Starting scraper [${sessionId}] with browser: ${browser} | mode: ${mode}`);
 
-    // Data handling (stdout)
-    scraperProcess.stdout.on('data', (data) => {
-        const output = data.toString().trim();
-        const lines = output.split('\n');
-        
-        lines.forEach(line => {
-            const trimmedLine = line.trim();
-            if (!trimmedLine) return;
+    // Data handling (stdout) - Robust line-by-line parsing
+    const rl = readline.createInterface({
+        input: scraperProcess.stdout,
+        terminal: false
+    });
 
-            let commentData = null;
-            if (trimmedLine.startsWith('COMMENT:')) {
-                try {
-                    commentData = JSON.parse(trimmedLine.substring(8));
-                } catch (e) {}
-            } else if (trimmedLine.startsWith('{') && trimmedLine.endsWith('}')) {
-                try {
-                    commentData = JSON.parse(trimmedLine);
-                } catch (e) {}
-            }
+    rl.on('line', (line) => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return;
 
-            if (commentData && commentData.username && commentData.comment) {
-                addCommentToSession(sessionId, commentData);
-                
-                // Send to webhooks if in respond mode and not internal
-                if (mode === 'respond' && !commentData.isInternal && webhooks && webhooks.length > 0) {
-                    webhooks.forEach(wh => sendWebhook(wh, commentData).catch(e => console.error('Webhook error:', e)));
-                }
-            } else {
-                console.log(`[${sessionId}]`, trimmedLine);
+        let commentData = null;
+        if (trimmedLine.startsWith('COMMENT:')) {
+            try {
+                commentData = JSON.parse(trimmedLine.substring(8));
+            } catch (e) {}
+        } else if (trimmedLine.startsWith('{') && trimmedLine.endsWith('}')) {
+            try {
+                commentData = JSON.parse(trimmedLine);
+            } catch (e) {}
+        }
+
+        if (commentData && commentData.username && commentData.comment) {
+            addCommentToSession(sessionId, commentData);
+            
+            // Send to webhooks if in respond mode and not internal
+            if (mode === 'respond' && !commentData.isInternal && webhooks && webhooks.length > 0) {
+                webhooks.forEach(wh => sendWebhook(wh, commentData).catch(e => console.error('Webhook error:', e)));
             }
-        });
+        } else {
+            console.log(`[${sessionId}]`, trimmedLine);
+        }
     });
 
     scraperProcess.stderr.on('data', (data) => {

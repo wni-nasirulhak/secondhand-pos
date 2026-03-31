@@ -141,6 +141,15 @@ class App {
             }
         );
 
+        // Mock Rules Editor (Phase 3)
+        const mockRulesContainer = document.getElementById('mock-rules-container');
+        if (mockRulesContainer) {
+            this.mockRulesEditor = new MockRulesEditor(
+                mockRulesContainer,
+                this.api
+            );
+        }
+
         // โหลดสถานะเริ่มต้น
         this.checkStatus();
         this.startStatusPolling();
