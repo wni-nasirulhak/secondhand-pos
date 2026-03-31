@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Multi-Platform Live Scraper Hub</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+    <div class="container modern-ui">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🚀 Multi-Platform Live Scraper</h1>
+                <p>ระบบดึงคอมเมนต์ & ตอบกลับอัตโนมัติ (TikTok, Shopee, Lazada, FB, IG, YT)</p>
+            </div>
+        </header>
+
+
+        <!-- Tabs -->
+        <div style="margin: 20px 0; border-bottom: 2px solid var(--border-color);">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="tab-btn active" data-tab="scraper" style="
+                    padding: 12px 24px;
+                    background: transparent;
+                    border: none;
+                    border-bottom: 3px solid transparent;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    transition: all 0.3s;
+                ">
+                    🔴 Scraper
+                </button>
+                <button class="tab-btn" data-tab="stats" style="
+                    padding: 12px 24px;
+                    background: transparent;
+                    border: none;
+                    border-bottom: 3px solid transparent;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    transition: all 0.3s;
+                ">
+                    📊 สถิติ
+                </button>
+                <button class="tab-btn" data-tab="users" style="
+                    padding: 12px 24px;
+                    background: transparent;
+                    border: none;
+                    border-bottom: 3px solid transparent;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    transition: all 0.3s;
+                ">
+                    👥 จัดการผู้ใช้
+                </button>
+                <button class="tab-btn" data-tab="errors" style="
+                    padding: 12px 24px;
+                    background: transparent;
+                    border: none;
+                    border-bottom: 3px solid transparent;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    transition: all 0.3s;
+                ">
+                    🛡️ ข้อผิดพลาด
+                </button>
+                <button class="tab-btn" data-tab="webhook" style="
+                    padding: 12px 24px;
+                    background: transparent;
+                    border: none;
+                    border-bottom: 3px solid transparent;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    transition: all 0.3s;
+                ">
+                    🔗 Webhook
+                </button>
+                <button class="tab-btn" data-tab="history" style="
+                    padding: 12px 24px;
+                    background: transparent;
+                    border: none;
+                    border-bottom: 3px solid transparent;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    transition: all 0.3s;
+                ">
+                    📜 ประวัติ
+                </button>
+                <button class="tab-btn" data-tab="ai-webhook" style="
+                    padding: 12px 24px;
+                    background: transparent;
+                    border: none;
+                    border-bottom: 3px solid transparent;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    transition: all 0.3s;
+                ">
+                    🤖 AI Reply
+                </button>
+                <button class="tab-btn" data-tab="mock-rules" style="
+                    padding: 12px 24px;
+                    background: transparent;
+                    border: none;
+                    border-bottom: 3px solid transparent;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    transition: all 0.3s;
+                ">
+                    ⚙️ Mock Rules
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-grid tab-content" id="tab-scraper">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Session Manager (Phase 3) -->
+                <div class="card" id="session-manager-wrapper" style="display: none;">
+                    <div id="session-container"></div>
+                </div>
+
+                <!-- Config Form -->
+                <div class="card">
+                    <div id="config-container"></div>
+                </div>
+
+                <!-- Control Panel -->
+                <div class="card">
+                    <div id="control-container"></div>
+                </div>
+
+                <!-- Preset Manager -->
+                <div class="card">
+                    <div id="preset-container"></div>
+                </div>
+
+                <!-- Keyword Alert -->
+                <div class="card">
+                    <div id="keyword-container"></div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <!-- Status Bar -->
+                <div class="card">
+                    <div id="status-container"></div>
+                </div>
+
+                <!-- Comment List -->
+                <div class="card">
+                    <div id="comments-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div class="tab-content" id="tab-stats" style="display: none;">
+            <div class="card">
+                <div id="stats-container"></div>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div class="tab-content" id="tab-users" style="display: none;">
+            <div class="card">
+                <div id="users-container"></div>
+            </div>
+        </div>
+
+        <!-- Errors Tab -->
+        <div class="tab-content" id="tab-errors" style="display: none;">
+            <div class="card">
+                <div id="errors-container"></div>
+            </div>
+        </div>
+
+        <!-- Webhook Tab -->
+        <div class="tab-content" id="tab-webhook" style="display: none;">
+            <div class="card">
+                <div id="webhook-container"></div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div class="tab-content" id="tab-history" style="display: none;">
+            <div class="card">
+                <div id="history-container"></div>
+            </div>
+        </div>
+
+        <!-- AI Webhook Tab -->
+        <div class="tab-content" id="tab-ai-webhook" style="display: none;">
+            <div class="card">
+                <div id="ai-webhook-container" class="stack-y gap-lg"></div>
+            </div>
+        </div>
+
+        <!-- Mock Rules Tab -->
+        <div class="tab-content" id="tab-mock-rules" style="display: none;">
+            <div class="card">
+                <div id="mock-rules-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/js/app.js"></script>
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                
+                // Update active button
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.style.borderBottomColor = 'transparent';
+                    b.style.color = 'var(--text-secondary)';
+                });
+                btn.classList.add('active');
+                btn.style.borderBottomColor = 'var(--accent-primary)';
+                btn.style.color = 'var(--text-primary)';
+                
+                // Show/hide content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById(`tab-${tab}`).classList.remove('hidden');
+
+                // Dispatch global event for components
+                window.dispatchEvent(new CustomEvent('tab-change', { detail: { tab } }));
+            });
+        });
+    </script>
+</body>
+</html>

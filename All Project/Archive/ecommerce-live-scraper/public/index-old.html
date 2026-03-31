@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛒 E-commerce Live Scraper</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🛒 E-commerce Live Scraper</h1>
+            <p>Multi-Platform Live Comment Scraper - TikTok, Shopee, Lazada & More!</p>
+        </header>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="scraper">🔴 Scraper</button>
+            <button class="tab-btn" data-tab="stats">📊 สถิติ</button>
+            <button class="tab-btn" data-tab="users">👥 จัดการผู้ใช้</button>
+            <button class="tab-btn" data-tab="errors">🛡️ ข้อผิดพลาด</button>
+            <button class="tab-btn" data-tab="webhook">🔗 Webhook</button>
+            <button class="tab-btn" data-tab="history">📜 ประวัติ</button>
+            <button class="tab-btn" data-tab="ai-reply">🤖 AI ตอบกลับ</button>
+            <button class="tab-btn" data-tab="mock-rules">🎭 Mock Rules</button>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Scraper Tab -->
+            <div id="tab-scraper" class="tab-content active">
+                <!-- Sidebar: Configuration -->
+                <aside class="sidebar" style="display: block;">
+                    <h2 style="margin-bottom: 20px; font-size: 1.3rem;">⚙️ การตั้งค่า</h2>
+
+                    <!-- General Settings -->
+                    <div class="accordion open">
+                        <div class="accordion-header">
+                            <div class="accordion-title">🎯 การตั้งค่าทั่วไป</div>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="form-group">
+                                    <label>Platform</label>
+                                    <select id="platform">
+                                        <option value="tiktok">🎵 TikTok Live</option>
+                                        <option value="shopee">🛒 Shopee Live</option>
+                                        <option value="lazada">📦 Lazada Live</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Live URL</label>
+                                    <input type="text" id="url" placeholder="https://...">
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Duration (วินาที)</label>
+                                        <input type="number" id="duration" value="60" min="10">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Interval (วินาที)</label>
+                                        <input type="number" id="interval" value="3" min="1">
+                                    </div>
+                                </div>
+
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="headless">
+                                    <label for="headless">Headless Mode (ซ่อน browser)</label>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Browser</label>
+                                    <select id="browser">
+                                        <option value="chromium">Chromium</option>
+                                        <option value="firefox">Firefox</option>
+                                        <option value="webkit">WebKit</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Auth Settings -->
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <div class="accordion-title">🔐 การเข้าถึงบัญชี</div>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="form-group">
+                                    <label>Auth Mode</label>
+                                    <select id="authMode">
+                                        <option value="storage">Storage State (แนะนำ)</option>
+                                        <option value="chrome">Chrome Profile</option>
+                                        <option value="persistent">Persistent Context</option>
+                                        <option value="none">ไม่ใช้</option>
+                                    </select>
+                                </div>
+
+                                <div id="chromeProfileSection" style="display: none;">
+                                    <div class="form-group">
+                                        <label>Chrome Profile Path</label>
+                                        <input type="text" id="chromePath" placeholder="C:\Users\...">
+                                        <button class="btn btn-secondary btn-small mt-1" id="findChromeBtn">
+                                            🔍 หาอัตโนมัติ
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="storageStateSection">
+                                    <button class="btn btn-secondary btn-small mt-1" id="checkCookiesBtn">
+                                        🍪 เช็คคุกกี้
+                                    </button>
+                                    <button class="btn btn-secondary btn-small mt-1" id="importCookiesBtn">
+                                        📥 นำเข้าคุกกี้
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reply Settings -->
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <div class="accordion-title">💬 การตอบกลับอัตโนมัติ</div>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="form-group">
+                                    <label>Mode</label>
+                                    <select id="mode">
+                                        <option value="read">อ่านอย่างเดียว</option>
+                                        <option value="respond">ตอบกลับอัตโนมัติ</option>
+                                    </select>
+                                </div>
+
+                                <div id="replySettings" style="display: none;">
+                                    <div class="form-group">
+                                        <label>Reply Cooldown (วินาที)</label>
+                                        <input type="number" id="replyCooldown" value="5" min="1">
+                                    </div>
+
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="replyOnQuestion" checked>
+                                        <label for="replyOnQuestion">ตอบเฉพาะคำถาม</label>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>AI Webhook URL (ถ้ามี)</label>
+                                        <input type="url" id="aiWebhookUrl" placeholder="http://localhost:3099/webhook">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Host Username (ยกเว้น)</label>
+                                        <input type="text" id="hostUsername" placeholder="your_username">
+                                    </div>
+
+                                    <button class="btn btn-secondary btn-small mt-1" id="manageTemplatesBtn">
+                                        ✏️ จัดการเทมเพลต
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Filters -->
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <div class="accordion-title">🚫 ตัวกรองผู้ใช้</div>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="accordion-body">
+                                <div class="form-group">
+                                    <label>Blacklist (ผู้ใช้ที่บล็อก)</label>
+                                    <textarea id="blacklist" placeholder="ใส่ username ทีละบรรทัด"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Whitelist (ผู้ใช้ที่อนุญาต)</label>
+                                    <textarea id="whitelist" placeholder="ใส่ username ทีละบรรทัด"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>VIP List (ผู้ใช้พิเศษ)</label>
+                                    <textarea id="viplist" placeholder="ใส่ username ทีละบรรทัด"></textarea>
+                                </div>
+
+                                <div class="button-group">
+                                    <button class="btn btn-secondary btn-small" id="importFiltersBtn">
+                                        📥 นำเข้า
+                                    </button>
+                                    <button class="btn btn-secondary btn-small" id="exportFiltersBtn">
+                                        📤 ส่งออก
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Control Panel -->
+                    <div style="margin-top: 20px;">
+                        <div class="button-group">
+                            <button class="btn btn-primary" id="startBtn">
+                                ▶️ เริ่มรับคอมเมนต์
+                            </button>
+                            <button class="btn btn-danger" id="stopBtn" disabled>
+                                ⏹️ หยุด
+                            </button>
+                        </div>
+
+                        <div class="button-group mt-2">
+                            <button class="btn btn-secondary btn-small" id="downloadJsonBtn">
+                                📥 ดาวน์โหลด JSON
+                            </button>
+                            <button class="btn btn-secondary btn-small" id="downloadCsvBtn">
+                                📥 ดาวน์โหลด CSV
+                            </button>
+                        </div>
+
+                        <button class="btn btn-secondary btn-small mt-1" id="clearCommentsBtn" style="width: 100%;">
+                            🗑️ ล้างคอมเมนต์
+                        </button>
+                    </div>
+
+                    <!-- Presets -->
+                    <div class="card mt-3" style="padding: 15px;">
+                        <h3 style="font-size: 1rem; margin-bottom: 10px;">📁 Presets</h3>
+                        <div id="presetsList"></div>
+                        <button class="btn btn-secondary btn-small mt-1" id="savePresetBtn" style="width: 100%;">
+                            ➕ บันทึก Preset
+                        </button>
+                    </div>
+
+                    <!-- Keyword Alerts -->
+                    <div class="card mt-3" style="padding: 15px;">
+                        <h3 style="font-size: 1rem; margin-bottom: 10px;">⚠️ แจ้งเตือนคำสำคัญ</h3>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="keywordAlertsEnabled">
+                            <label for="keywordAlertsEnabled">เปิดใช้งาน</label>
+                        </div>
+                        <div id="keywordAlertsSection" style="display: none;">
+                            <div class="form-group mt-1">
+                                <input type="text" id="keywordInput" placeholder="พิมพ์คำสำคัญ...">
+                            </div>
+                            <button class="btn btn-secondary btn-small" id="addKeywordBtn" style="width: 100%;">
+                                ➕ เพิ่มคำสำคัญ
+                            </button>
+                            <div id="keywordsList" class="mt-2"></div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main Content: Status & Comments -->
+                <main class="main-content">
+                    <!-- Status Bar -->
+                    <div class="status-bar">
+                        <div class="status-item">
+                            <div class="status-label">สถานะ</div>
+                            <div class="status-value">
+                                <span class="status-badge idle" id="statusBadge">
+                                    ⚪ พร้อมใช้งาน
+                                </span>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">เวลาทำงาน</div>
+                            <div class="status-value" id="uptime">00:00:00</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">คอมเมนต์</div>
+                            <div class="status-value" id="commentCount">0</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-label">Platform</div>
+                            <div class="status-value" id="currentPlatform">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="🔍 ค้นหาคอมเมนต์...">
+                        <button class="btn btn-secondary" id="searchBtn">ค้นหา</button>
+                        <button class="btn btn-secondary" id="refreshBtn">🔄</button>
+                    </div>
+
+                    <!-- Comments Container -->
+                    <div class="comments-container">
+                        <div class="comments-header">
+                            <div class="comments-title">💬 คอมเมนต์ที่ดึงได้</div>
+                            <div style="color: var(--text-secondary);" id="commentCountDisplay">0 รายการ</div>
+                        </div>
+                        <div class="comments-list" id="commentsList">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">💬</div>
+                                <p>ยังไม่มีคอมเมนต์</p>
+                                <p class="text-small">กด "เริ่มรับคอมเมนต์" เพื่อเริ่มดึงข้อมูล</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+
+            <!-- Stats Tab -->
+            <div id="tab-stats" class="tab-content">
+                <div id="statsContent" style="padding: 20px;">Loading...</div>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="tab-users" class="tab-content">
+                <div id="usersContent" style="padding: 20px;">Loading...</div>
+            </div>
+
+            <!-- Errors Tab -->
+            <div id="tab-errors" class="tab-content">
+                <div id="errorsContent" style="padding: 20px;">Loading...</div>
+            </div>
+
+            <!-- Webhook Tab -->
+            <div id="tab-webhook" class="tab-content">
+                <div id="webhookContent" style="padding: 20px;">Loading...</div>
+            </div>
+
+            <!-- History Tab -->
+            <div id="tab-history" class="tab-content">
+                <div id="historyContent" style="padding: 20px;">Loading...</div>
+            </div>
+
+            <!-- AI Reply Tab -->
+            <div id="tab-ai-reply" class="tab-content">
+                <div id="aiReplyContent" style="padding: 20px;">Loading...</div>
+            </div>
+
+            <!-- Mock Rules Tab -->
+            <div id="tab-mock-rules" class="tab-content">
+                <div id="mockRulesContent" style="padding: 20px;">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/components/StatsDashboard.js"></script>
+    <script src="js/components/UserListManager.js"></script>
+    <script src="js/components/WebhookManager.js"></script>
+    <script src="js/components/HistoryViewer.js"></script>
+    <script src="js/components/ErrorTracker.js"></script>
+    <script src="js/components/AIReplyManager.js"></script>
+    <script src="js/components/MockRulesEditor.js"></script>
+    <script src="js/components/ScraperEnhancements.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

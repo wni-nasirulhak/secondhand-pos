@@ -1,0 +1,20 @@
+{
+  "defaultPlatform": "tiktok",
+  "platforms": {
+    "tiktok": {
+      "timeout": 30000,
+      "retryAttempts": 3,
+      "retryDelay": 5000
+    },
+    "shopee": {
+      "timeout": 30000,
+      "retryAttempts": 3,
+      "retryDelay": 5000
+    },
+    "lazada": {
+      "timeout": 30000,
+      "retryAttempts": 3,
+      "retryDelay": 5000
+    }
+  }
+}

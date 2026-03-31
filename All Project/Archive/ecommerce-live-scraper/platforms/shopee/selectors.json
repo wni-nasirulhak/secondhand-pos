@@ -1,0 +1,8 @@
+{
+  "commentContainer": ".live-chat-comment-item, [class*=\"ChatItem\"], [class*=\"CommentItem\"]",
+  "username": ".username, [class*=\"Username\"], [class*=\"UserName\"]",
+  "commentText": ".comment-text, [class*=\"CommentText\"], [class*=\"MessageText\"]",
+  "timestamp": ".timestamp, [class*=\"Time\"]",
+  "commentInput": "input[placeholder*=\"พิมพ์\"], input[placeholder*=\"comment\"], textarea",
+  "sendButton": "button[type=\"submit\"], button[aria-label*=\"Send\"], [class*=\"SendButton\"]"
+}

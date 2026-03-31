@@ -1,0 +1,31 @@
+{
+  "name": "web-pos",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "npx @cloudflare/next-on-pages",
+    "start": "next start",
+    "lint": "next lint",
+    "mode:edge": "node scripts/toggle_edge.mjs edge",
+    "mode:local": "node scripts/toggle_edge.mjs local",
+    "pages:build": "npx @cloudflare/next-on-pages"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.8.0",
+    "jose": "^6.2.1",
+    "jsbarcode": "^3.12.3",
+    "lucide-react": "^0.577.0",
+    "next": "15.1.7",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "recharts": "^3.8.0"
+  },
+  "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.7",
+    "tailwindcss": "^4"
+  }
+}

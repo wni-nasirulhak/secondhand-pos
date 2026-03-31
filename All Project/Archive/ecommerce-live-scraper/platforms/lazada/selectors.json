@@ -1,0 +1,8 @@
+{
+  "commentContainer": "[class*=\"comment\"], [class*=\"ChatItem\"], [class*=\"MessageItem\"]",
+  "username": "[class*=\"username\"], [class*=\"UserName\"], [class*=\"nickname\"]",
+  "commentText": "[class*=\"text\"], [class*=\"content\"], [class*=\"message\"]",
+  "timestamp": "[class*=\"time\"], [class*=\"timestamp\"]",
+  "commentInput": "input[type=\"text\"], textarea, [contenteditable=\"true\"]",
+  "sendButton": "button[type=\"submit\"], [class*=\"send\"], [class*=\"submit\"]"
+}

@@ -1,0 +1,7 @@
+{
+  "commentContainer": "[data-e2e=\"comment-item\"], .comment-item, [class*=\"Comment\"]",
+  "username": "[data-e2e=\"comment-username\"], .comment-username, [class*=\"Username\"]",
+  "commentText": "[data-e2e=\"comment-text\"], .comment-text-content, [class*=\"CommentText\"]",
+  "commentInput": "input[placeholder*=\"comment\"], textarea[placeholder*=\"comment\"]",
+  "sendButton": "button[type=\"submit\"], button[data-e2e=\"send-comment\"]"
+}

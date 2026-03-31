@@ -1,0 +1,462 @@
+// Main application
+import { API } from './utils/api.js';
+import { Storage, PresetManager as PresetManagerUtil, RecentURLsManager } from './utils/storage.js';
+import { ConfigForm } from './components/ConfigFormNew.js';
+import { ControlPanel } from './components/ControlPanel.js';
+import { CommentList } from './components/CommentList.js';
+import { StatusBar } from './components/StatusBar.js';
+import { PresetManager } from './components/PresetManager.js';
+import { KeywordAlert } from './components/KeywordAlert.js';
+import { CommentHistory } from './components/CommentHistory.js';
+import { StatsDashboard } from './components/StatsDashboard.js';
+import { UserListManager } from './components/UserListManager.js';
+import { ErrorHandler } from './components/ErrorHandler.js';
+import { WebhookManager } from './components/WebhookManager.js';
+import { AIWebhookManager } from './components/AIWebhookManager.js';
+import { MockRulesEditor } from './components/MockRulesEditor.js';
+
+class App {
+    constructor() {
+        this.api = new API();
+        this.storage = new Storage();
+        this.presetManager = new PresetManagerUtil(this.storage);
+        this.recentURLsManager = new RecentURLsManager(this.storage);
+        this.pollInterval = null;
+        this.init();
+    }
+
+    init() {
+        // สร้าง components
+        this.configForm = new ConfigForm(
+            document.getElementById('config-container'),
+            this.recentURLsManager,
+            this.api,
+            this.storage
+        );
+
+        // โหลด config ล่าสุด
+        this.loadLastConfig();
+
+        // Auto-save config
+        this.configForm.onConfigChange = (config) => {
+            this.storage.set('last_config', config);
+        };
+
+        this.statusBar = new StatusBar(
+            document.getElementById('status-container')
+        );
+
+        this.controlPanel = new ControlPanel(
+            document.getElementById('control-container'),
+            {
+                onStart: () => this.handleStart(),
+                onStop: () => this.handleStop(),
+                onDownload: (format) => this.handleDownload(format),
+                onClear: () => this.handleClear()
+            }
+        );
+
+        this.commentList = new CommentList(
+            document.getElementById('comments-container')
+        );
+
+        // Preset Manager
+        this.presetManagerComponent = new PresetManager(
+            document.getElementById('preset-container'),
+            this.presetManager,
+            {
+                onSave: (name) => this.handleSavePreset(name),
+                onLoad: (config) => this.handleLoadPreset(config),
+                onDelete: (id) => this.handleDeletePreset(id)
+            }
+        );
+
+        // Keyword Alert
+        this.keywordAlert = new KeywordAlert(
+            document.getElementById('keyword-container'),
+            this.storage,
+            {
+                onAdd: (keyword) => this.showNotification(`➕ เพิ่มคำสำคัญ: "${keyword}"`, 'success'),
+                onRemove: (keyword) => this.showNotification(`➖ ลบคำสำคัญ: "${keyword}"`, 'info'),
+                onToggle: (enabled) => {
+                    this.showNotification(
+                        enabled ? '🔔 เปิดการแจ้งเตือนแล้ว' : '🔕 ปิดการแจ้งเตือนแล้ว',
+                        'info'
+                    );
+                },
+                onAlert: (alert) => this.handleKeywordAlert(alert)
+            }
+        );
+
+        // Comment History
+        this.commentHistory = new CommentHistory(
+            document.getElementById('history-container'),
+            this.api
+        );
+
+        // Stats Dashboard (Phase 2)
+        this.statsDashboard = new StatsDashboard(
+            document.getElementById('stats-container')
+        );
+
+        // User List Manager (Phase 2)
+        this.userListManager = new UserListManager(
+            document.getElementById('users-container'),
+            this.storage
+        );
+
+        // Error Handler (Phase 2)
+        this.errorHandler = new ErrorHandler(
+            document.getElementById('errors-container')
+        );
+
+        // Webhook Manager (Phase 3)
+        this.webhookManager = new WebhookManager(
+            document.getElementById('webhook-container'),
+            this.storage,
+            this.api
+        );
+
+        // AI Webhook Manager (Phase 3 - AI Reply)
+        const aiWebhookContainer = document.getElementById('ai-webhook-container');
+        if (aiWebhookContainer) {
+            this.aiWebhookManager = new AIWebhookManager(
+                aiWebhookContainer,
+                this.storage,
+                this.api
+            );
+        }
+
+        // Mock Rules Editor
+        const mockRulesContainer = document.getElementById('mock-rules-container');
+        if (mockRulesContainer) {
+            this.mockRulesEditor = new MockRulesEditor(
+                mockRulesContainer,
+                this.api
+            );
+        }
+
+        // โหลดสถานะเริ่มต้น
+        this.checkStatus();
+    }
+
+    loadLastConfig() {
+        const lastConfig = this.storage.get('last_config');
+        if (lastConfig) {
+            this.configForm.setConfig(lastConfig);
+        }
+    }
+
+    handleSavePreset(name) {
+        const config = this.configForm.getConfig();
+        this.presetManager.save(name, config);
+        this.showNotification(`💾 บันทึกการตั้งค่า "${name}" แล้ว`, 'success');
+    }
+
+    handleLoadPreset(config) {
+        this.configForm.setConfig(config);
+        this.showNotification('📂 โหลดการตั้งค่าสำเร็จ!', 'success');
+    }
+
+    handleDeletePreset(id) {
+        this.showNotification('🗑️ ลบการตั้งค่าแล้ว', 'info');
+    }
+
+    handleKeywordAlert(alert) {
+        const message = `🔔 พบคำสำคัญ "${alert.keyword}"\n👤 ${alert.comment.username}: ${alert.comment.comment}`;
+        this.showNotification(message, 'warning', 5000);
+        
+        // แสดง browser notification (ถ้าอนุญาต)
+        this.showBrowserNotification(alert);
+    }
+
+    async showBrowserNotification(alert) {
+        if (!('Notification' in window)) return;
+
+        if (Notification.permission === 'granted') {
+            new Notification(`🔔 พบคำสำคัญ: ${alert.keyword}`, {
+                body: `${alert.comment.username}: ${alert.comment.comment}`,
+                icon: '/favicon.ico',
+                tag: 'keyword-alert',
+                requireInteraction: false
+            });
+        } else if (Notification.permission !== 'denied') {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                this.showBrowserNotification(alert);
+            }
+        }
+    }
+
+    async handleStart() {
+        // Validate config
+        const validation = this.configForm.validate();
+        if (!validation.valid) {
+            alert('❌ ' + validation.errors.join('\n'));
+            return;
+        }
+
+        const config = this.configForm.getConfig();
+        
+        // Add user lists from UserListManager
+        if (this.userListManager) {
+            config.blacklist = this.userListManager.blacklist;
+            config.whitelist = this.userListManager.whitelist;
+            config.viplist = this.userListManager.viplist;
+        }
+        
+        // Add webhooks from WebhookManager
+        if (this.webhookManager) {
+            config.webhooks = this.webhookManager.getEnabledWebhooks();
+        }
+
+        // Add AI Webhook URL from AIWebhookManager
+        if (this.aiWebhookManager) {
+            const aiUrl = this.aiWebhookManager.getAIWebhookUrl();
+            if (aiUrl) {
+                config.aiWebhookUrl = aiUrl;
+                console.log('🤖 AI Webhook URL set:', aiUrl);
+            }
+        }
+
+        try {
+            // บันทึก URL ลง recent URLs
+            this.recentURLsManager.add(config.url);
+            
+            // บันทึก config ล่าสุด
+            this.storage.set('last_config', config);
+
+            // เริ่ม scraper
+            const result = await this.api.startScraper(config);
+            
+            if (result.success) {
+                this.configForm.disable();
+                this.controlPanel.setRunning(true);
+                this.statusBar.start();
+                this.statusBar.setUrl(config.url);
+                
+                // ล้าง alerts เก่า
+                this.keywordAlert.clearAlerts();
+                
+                // เริ่ม polling comments
+                this.startPolling();
+                
+                this.showNotification('✅ เริ่มดึงคอมเมนต์แล้ว!', 'success');
+            } else {
+                throw new Error(result.error || 'ไม่สามารถเริ่มการทำงานได้');
+            }
+        } catch (error) {
+            console.error('Error starting scraper:', error);
+            this.statusBar.error(error.message);
+            this.showNotification('❌ ' + error.message, 'error');
+        }
+    }
+
+    async handleStop() {
+        try {
+            const result = await this.api.stopScraper();
+            
+            if (result.success) {
+                this.stopPolling();
+                this.configForm.enable();
+                this.controlPanel.setRunning(false);
+                this.statusBar.stop();
+                
+                this.showNotification('⏹️ หยุดการทำงานแล้ว', 'info');
+                
+                // ตรวจสอบสถานะอีกครั้งหลัง 2 วินาที
+                setTimeout(() => this.verifyStopStatus(), 2000);
+            } else {
+                throw new Error(result.error || 'ไม่สามารถหยุดการทำงานได้');
+            }
+        } catch (error) {
+            console.error('Error stopping scraper:', error);
+            this.showNotification('❌ ' + error.message, 'error');
+        }
+    }
+
+    async verifyStopStatus() {
+        try {
+            const status = await this.api.getStatus();
+            if (status.running) {
+                console.warn('⚠️ Scraper still running after stop command');
+                this.showNotification('⚠️ กำลังบังคับหยุด...', 'warning');
+                // ลองหยุดอีกครั้ง
+                await this.api.stopScraper();
+            }
+        } catch (error) {
+            console.error('Error verifying stop status:', error);
+        }
+    }
+
+    handleDownload(format) {
+        const comments = this.commentList.getComments();
+        
+        if (comments.length === 0) {
+            this.showNotification('⚠️ ยังไม่มีคอมเมนต์ให้ดาวน์โหลด', 'warning');
+            return;
+        }
+
+        if (format === 'json') {
+            this.downloadJSON(comments);
+        } else if (format === 'csv') {
+            this.downloadCSV(comments);
+        }
+
+        this.showNotification(`💾 ดาวน์โหลด ${format.toUpperCase()} สำเร็จ!`, 'success');
+    }
+
+    handleClear() {
+        if (confirm('⚠️ ต้องการล้างคอมเมนต์ทั้งหมดหรือไม่?')) {
+            this.commentList.clear();
+            this.showNotification('🗑️ ล้างคอมเมนต์แล้ว', 'info');
+        }
+    }
+
+    startPolling() {
+        // Poll ทุก 2 วินาที
+        this.pollInterval = setInterval(() => this.pollComments(), 2000);
+        this.pollComments(); // เรียกทันที
+    }
+
+    stopPolling() {
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval);
+            this.pollInterval = null;
+        }
+    }
+
+    async pollComments() {
+        try {
+            const result = await this.api.getComments(100);
+            
+            if (result.comments && result.comments.length > 0) {
+                // เพิ่มคอมเมนต์ใหม่
+                const currentComments = this.commentList.getComments();
+                const newComments = result.comments.filter(newComment => 
+                    !currentComments.some(existing => 
+                        existing.username === newComment.username && 
+                        existing.comment === newComment.comment &&
+                        existing.timestamp === newComment.timestamp
+                    )
+                );
+
+                if (newComments.length > 0) {
+                    newComments.forEach(comment => {
+                        this.commentList.addComment(comment);
+                        
+                        // ตรวจสอบ keyword alerts
+                        this.keywordAlert.checkComment(comment);
+                    });
+                }
+
+                // อัปเดต stats
+                const allComments = this.commentList.getComments();
+                this.statusBar.updateStats(allComments.length);
+                
+                // อัปเดต stats dashboard
+                if (this.statsDashboard) {
+                    this.statsDashboard.updateStats(allComments);
+                }
+            }
+        } catch (error) {
+            console.error('Error polling comments:', error);
+            
+            // Log error to error handler
+            if (this.errorHandler) {
+                const errorId = this.errorHandler.logError(error);
+                
+                // Try to recover
+                setTimeout(() => {
+                    if (this.errorHandler) {
+                        this.errorHandler.markRecovered(errorId);
+                    }
+                }, 5000);
+            }
+        }
+    }
+
+    async checkStatus() {
+        try {
+            const status = await this.api.getStatus();
+            
+            if (status.running) {
+                this.configForm.disable();
+                this.controlPanel.setRunning(true);
+                this.statusBar.start();
+                this.startPolling();
+            }
+        } catch (error) {
+            console.error('Error checking status:', error);
+        }
+    }
+
+    downloadJSON(comments) {
+        const dataStr = JSON.stringify(comments, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `tiktok_comments_${this.getTimestamp()}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    downloadCSV(comments) {
+        const headers = ['Timestamp', 'Username', 'Comment'];
+        const rows = comments.map(c => [
+            c.timestamp,
+            c.username,
+            c.comment.replace(/"/g, '""') // Escape quotes
+        ]);
+
+        const csv = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }); // BOM for UTF-8
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `tiktok_comments_${this.getTimestamp()}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    getTimestamp() {
+        return new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    }
+
+    showNotification(message, type = 'info', duration = 3000) {
+        // สร้าง notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        
+        // แสดงข้อความแบบ multiline
+        const lines = message.split('\n');
+        notification.innerHTML = lines.map(line => `<div>${this.escapeHtml(line)}</div>`).join('');
+        
+        document.body.appendChild(notification);
+        
+        // แสดง notification
+        setTimeout(() => notification.classList.add('show'), 10);
+        
+        // ซ่อนและลบ
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, duration);
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+// เริ่มแอพ
+document.addEventListener('DOMContentLoaded', () => {
+    new App();
+});

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛒 E-commerce Live Scraper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style-v2.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div>
+                    <h1><span style="font-size: 1.8rem;">💎</span> E-com Live Scraper</h1>
+                    <p>Live Comment Extraction & AI Automation Hub</p>
+                </div>
+                <div class="header-status">
+                    <span class="status-badge idle" id="topStatusBadge">⚪ Ready</span>
+                    <div class="status-info">
+                        <span id="topCommentCount">0</span> <small>COMMENTS</small>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="scraper">📡 Scraper</button>
+            <button class="tab-btn" data-tab="stats">📈 Statistics</button>
+            <button class="tab-btn" data-tab="users">👤 Users</button>
+            <button class="tab-btn" data-tab="webhook">🔌 Webhook</button>
+            <button class="tab-btn" data-tab="history">🗂️ History</button>
+            <button class="tab-btn" data-tab="ai-reply">🧠 AI Reply</button>
+            <button class="tab-btn" data-tab="mock-rules">🎭 Rules</button>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Scraper Tab -->
+            <div id="tab-scraper" class="tab-content active">
+                <div class="scraper-layout">
+                    <!-- Quick Start Panel -->
+                    <div class="quick-start-panel">
+                        <div style="margin-bottom: 5px;">
+                            <h2 class="panel-title">⚡ Quick Start</h2>
+                            <p class="panel-subtitle">Select a platform and enter your live URL</p>
+                        </div>
+
+                        <!-- Platform Cards -->
+                        <div class="platform-cards">
+                            <div class="platform-card" data-platform="tiktok">
+                                <div class="platform-card-header">
+                                    <span class="platform-emoji">🎵</span>
+                                    <h3>TikTok Live</h3>
+                                </div>
+                                <div class="platform-card-body">
+                                    <p class="platform-description">Extract real-time comments from any TikTok Live session.</p>
+                                    <div class="platform-features">
+                                        <span class="feature-badge">Comments</span>
+                                        <span class="feature-badge">Replies</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="platform-card" data-platform="shopee">
+                                <div class="platform-card-header">
+                                    <span class="platform-emoji">🛒</span>
+                                    <h3>Shopee Live</h3>
+                                </div>
+                                <div class="platform-card-body">
+                                    <p class="platform-description">Professional extraction for Shopee Live sales and queries.</p>
+                                    <div class="platform-features">
+                                        <span class="feature-badge">Comments</span>
+                                        <span class="feature-badge">Replies</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="platform-card" data-platform="lazada">
+                                <div class="platform-card-header">
+                                    <span class="platform-emoji">📦</span>
+                                    <h3>Lazada Live</h3>
+                                </div>
+                                <div class="platform-card-body">
+                                    <p class="platform-description">Monitorazada Live events and customer interactions.</p>
+                                    <div class="platform-features">
+                                        <span class="feature-badge">Comments</span>
+                                        <span class="feature-badge inactive">Coming Soon</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- URL Input (appears after platform selection) -->
+                        <div id="urlInputSection" class="url-input-section" style="display: none;">
+                            <label class="input-label">
+                                <span class="label-icon">🔗</span>
+                                <span id="urlInputLabel">Live URL</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="quickUrl" 
+                                class="url-input" 
+                                placeholder="วาง URL ของไลฟ์ที่นี่..."
+                            >
+                            <div class="url-examples" id="urlExamples">
+                                <small class="text-secondary">ตัวอย่าง: https://www.tiktok.com/@username/live</small>
+                            </div>
+                        </div>
+
+                        <!-- Mode Selection -->
+                        <div id="modeSection" class="mode-section" style="display: none;">
+                            <label class="input-label">
+                                <span class="label-icon">⚙️</span>
+                                โหมดการทำงาน
+                            </label>
+                            <div class="mode-cards">
+                                <div class="mode-card active" data-mode="read">
+                                    <div class="mode-icon">👁️</div>
+                                    <h4>อ่านอย่างเดียว</h4>
+                                    <p>ดึงคอมเมนต์เท่านั้น</p>
+                                </div>
+                                <div class="mode-card" data-mode="respond">
+                                    <div class="mode-icon">💬</div>
+                                    <h4>ตอบกลับอัตโนมัติ</h4>
+                                    <p>ดึง + ตอบกลับอัตโนมัติ</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Settings -->
+                        <div id="quickSettings" class="quick-settings" style="display: none;">
+                            <div class="settings-row">
+                                <div class="setting-item">
+                                    <label>⏱️ ระยะเวลา (วินาที)</label>
+                                    <input type="number" id="quickDuration" value="60" min="10" max="3600">
+                                </div>
+                                <div class="setting-item">
+                                    <label>⚡ ตรวจสอบทุก (วินาที)</label>
+                                    <input type="number" id="quickInterval" value="3" min="1" max="60">
+                                </div>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="quickHeadless">
+                                <label for="quickHeadless">🕶️ Run in Background (Headless)</label>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div id="actionButtons" class="action-buttons" style="display: none;">
+                            <button class="btn btn-primary btn-large" id="quickStartBtn">
+                                <span class="btn-icon">▶️</span>
+                                <span>เริ่มรับคอมเมนต์</span>
+                            </button>
+                            <button class="btn btn-danger btn-large" id="quickStopBtn" style="display: none;">
+                                <span class="btn-icon">⏹️</span>
+                                <span>หยุดการทำงาน</span>
+                            </button>
+                        </div>
+
+                        <!-- Advanced Settings Toggle -->
+                        <div class="advanced-toggle">
+                            <button class="btn-link" id="showAdvancedBtn">
+                                ⚙️ ตั้งค่าขั้นสูง
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Comments Display -->
+                    <div class="comments-panel">
+                        <!-- Status Bar -->
+                        <div class="status-bar-compact">
+                            <div class="status-item-compact">
+                                <span class="status-badge idle" id="statusBadge">⚪ พร้อมใช้งาน</span>
+                            </div>
+                            <div class="status-item-compact">
+                                <span class="status-label">⏱️</span>
+                                <span id="uptime">00:00:00</span>
+                            </div>
+                            <div class="status-item-compact">
+                                <span class="status-label">💬</span>
+                                <span id="commentCount">0</span>
+                            </div>
+                            <div class="status-item-compact">
+                                <span class="status-label">📍</span>
+                                <span id="currentPlatform">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Search Bar -->
+                        <div class="search-bar-compact">
+                            <input type="text" id="searchInput" placeholder="🔍 ค้นหาคอมเมนต์...">
+                            <button class="btn btn-secondary btn-small" id="searchBtn">ค้นหา</button>
+                            <button class="btn btn-secondary btn-small" id="refreshBtn">🔄</button>
+                        </div>
+
+                        <!-- Comments List -->
+                        <div class="comments-container-new">
+                            <div class="comments-header-new">
+                                <div class="comments-title">💬 คอมเมนต์ที่ดึงได้</div>
+                                <div class="comments-actions">
+                                    <button class="btn btn-secondary btn-small" id="downloadJsonBtn">📥 JSON</button>
+                                    <button class="btn btn-secondary btn-small" id="downloadCsvBtn">📥 CSV</button>
+                                    <button class="btn btn-danger btn-small" id="clearCommentsBtn">🗑️ ล้าง</button>
+                                </div>
+                            </div>
+                            <div class="comments-list" id="commentsList">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">💬</div>
+                                    <p>ยังไม่มีคอมเมนต์</p>
+                                    <p class="text-small">เลือก platform และกด "เริ่มรับคอมเมนต์" เพื่อเริ่มต้น</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Settings Panel (Hidden by default) -->
+                <div id="advancedPanel" class="advanced-panel" style="display: none;">
+                    <div class="advanced-panel-header">
+                        <h3>⚙️ ตั้งค่าขั้นสูง</h3>
+                        <button class="btn btn-secondary btn-small" id="hideAdvancedBtn">✕ ปิด</button>
+                    </div>
+                    <div class="advanced-panel-body">
+                        <!-- Auth Settings, Filters, etc. -->
+                        <div class="setting-section">
+                            <h4>🔐 การเข้าถึงบัญชี</h4>
+                            <div class="form-group">
+                                <label>Auth Mode</label>
+                                <select id="authMode">
+                                    <option value="storage">Storage State (แนะนำ)</option>
+                                    <option value="chrome">Chrome Profile</option>
+                                    <option value="none">ไม่ใช้</option>
+                                </select>
+                            </div>
+
+                            <div id="chromeProfileSection" style="display: none; margin-top: 15px;">
+                                <div class="form-group">
+                                    <label>Chrome Profile Path</label>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" id="chromePath" placeholder="C:\Users\..." style="flex: 1;">
+                                        <button class="btn btn-secondary btn-small" id="findChromeBtn">🔍</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="storageStateSection" style="margin-top: 15px;">
+                                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.9rem;">การจัดการคุกกี้</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <button class="btn btn-secondary btn-small" id="checkCookiesBtn">
+                                        🍪 เช็คคุกกี้
+                                    </button>
+                                    <button class="btn btn-secondary btn-small" id="importCookiesBtn">
+                                        📥 นำเข้า
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-section">
+                            <h4>🚫 ตัวกรองผู้ใช้</h4>
+                            <div class="form-group">
+                                <label>Blacklist</label>
+                                <textarea id="blacklist" rows="3" placeholder="ใส่ username ที่บล็อก (ทีละบรรทัด)"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="setting-section">
+                            <h4>💬 การตอบกลับอัตโนมัติ</h4>
+                            <div class="form-group">
+                                <label>Reply Cooldown (วินาที)</label>
+                                <input type="number" id="replyCooldown" value="5" min="1">
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="replyOnQuestion" checked>
+                                <label for="replyOnQuestion">ตอบเฉพาะคำถาม</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Tabs (Stats, Users, etc.) -->
+            <div id="tab-stats" class="tab-content">
+                <div id="statsContent" style="padding: 20px;">Loading...</div>
+            </div>
+            <div id="tab-users" class="tab-content">
+                <div id="usersContent" style="padding: 20px;">Loading...</div>
+            </div>
+            <div id="tab-webhook" class="tab-content">
+                <div id="webhookContent" style="padding: 20px;">Loading...</div>
+            </div>
+            <div id="tab-history" class="tab-content">
+                <div id="historyContent" style="padding: 20px;">Loading...</div>
+            </div>
+            <div id="tab-ai-reply" class="tab-content">
+                <div id="aiReplyContent" style="padding: 20px;">Loading...</div>
+            </div>
+            <div id="tab-mock-rules" class="tab-content">
+                <div id="mockRulesContent" style="padding: 20px;">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/components/StatsDashboard.js"></script>
+    <script src="js/components/UserListManager.js"></script>
+    <script src="js/components/WebhookManager.js"></script>
+    <script src="js/components/HistoryViewer.js"></script>
+    <script src="js/components/ErrorTracker.js"></script>
+    <script src="js/components/AIReplyManager.js"></script>
+    <script src="js/components/MockRulesEditor.js"></script>
+    <script src="js/app-v2.js"></script>
+</body>
+</html>
