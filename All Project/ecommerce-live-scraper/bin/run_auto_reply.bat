@@ -14,6 +14,6 @@ echo Starting in 3 seconds...
 timeout /t 3 >nul
 echo.
 
-python auto_reply_system.py --duration 600 --visible
+python ..\scripts\python\auto_reply_system.py --duration 600 --visible
 
 pause

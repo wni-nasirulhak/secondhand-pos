@@ -7,8 +7,7 @@ const BaseLiveScraper = require('./base_plugin');
  */
 class TikTokPlugin extends BaseLiveScraper {
     constructor(page, config) {
-        super(page, config);
-        this.name = 'TikTok';
+        super(page, config, 'TikTok');
     }
 
     /**
@@ -16,14 +15,15 @@ class TikTokPlugin extends BaseLiveScraper {
      */
     async extractComments() {
         const page = this.page;
-        const extractionFn = () => {
+        const selectors = this.selectors;
+        const extractionFn = (sel) => {
             const results = [];
-            // ✅ WORKING SELECTORS (Verified 2026-03-27)
-            const messageContainers = document.querySelectorAll('div[data-e2e="chat-message"]');
+            // ✅ DYNAMIC SELECTORS (Centralized)
+            const messageContainers = document.querySelectorAll(sel.chat_message_container);
             
             messageContainers.forEach(container => {
                 try {
-                    const usernameEl = container.querySelector('[data-e2e="message-owner-name"]');
+                    const usernameEl = container.querySelector(sel.username);
                     if (!usernameEl) return;
                     
                     const username = usernameEl.innerText.trim();
@@ -82,13 +82,13 @@ class TikTokPlugin extends BaseLiveScraper {
 
         const allComments = [];
         try {
-            const mainComments = await page.evaluate(extractionFn);
+            const mainComments = await page.evaluate(extractionFn, selectors);
             allComments.push(...mainComments);
             const frames = page.frames();
             for (const frame of frames) {
                 if (frame === page.mainFrame()) continue;
                 try {
-                    const frameComments = await frame.evaluate(extractionFn);
+                    const frameComments = await frame.evaluate(extractionFn, selectors);
                     allComments.push(...frameComments);
                 } catch (e) {}
             }
@@ -104,7 +104,7 @@ class TikTokPlugin extends BaseLiveScraper {
     async sendReply(message) {
         const page = this.page;
         try {
-            const inputField = await page.$('div[data-e2e="room-chat-input-field"]');
+            const inputField = await page.$(this.selectors.input_field);
             if (!inputField) {
                 console.error('❌ TikTok Input field not found');
                 return false;
@@ -112,20 +112,20 @@ class TikTokPlugin extends BaseLiveScraper {
             await inputField.click();
             await page.waitForTimeout(300);
 
-            await page.evaluate((text) => {
-                const input = document.querySelector('div[data-e2e="room-chat-input-field"]');
+            await page.evaluate(({ text, sel }) => {
+                const input = document.querySelector(sel.input_field);
                 if (input) {
                     input.innerText = text;
                     input.textContent = text;
                     input.dispatchEvent(new Event('input', { bubbles: true }));
                     input.dispatchEvent(new Event('change', { bubbles: true }));
                 }
-            }, message);
+            }, { text: message, sel: this.selectors });
 
             await page.waitForTimeout(500);
-            await page.waitForSelector('div[data-e2e="room-chat-send-btn"].visible', { timeout: 2000 });
+            await page.waitForSelector(`${this.selectors.send_button}.visible`, { timeout: 2000 });
 
-            const sendButton = await page.$('div[data-e2e="room-chat-send-btn"]');
+            const sendButton = await page.$(this.selectors.send_button);
             if (!sendButton) return false;
 
             await sendButton.click();

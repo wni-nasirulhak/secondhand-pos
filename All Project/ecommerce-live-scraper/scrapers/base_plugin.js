@@ -4,9 +4,11 @@
  * Contains shared logic for filtering, AI webhooks, and session management.
  */
 class BaseLiveScraper {
-    constructor(page, config) {
+    constructor(page, config, name) {
         this.page = page;
         this.config = config;
+        this.name = name;
+        this.selectors = this.loadSelectors();
         this.seenKeys = new Set();
         this.repliedUsers = new Map();
         this.replyHistory = [];
@@ -15,6 +17,20 @@ class BaseLiveScraper {
         this.AI_COOLDOWN_MS = 10000;
         this.shouldStop = false;
         this.webhookSentKeys = new Set();
+    }
+
+    loadSelectors() {
+        try {
+            const path = require('path');
+            const fs = require('fs');
+            const selectorPath = path.join(__dirname, '..', 'src', 'config', 'selectors.json');
+            const allSelectors = JSON.parse(fs.readFileSync(selectorPath, 'utf8'));
+            const platform = (this.name || '').toLowerCase();
+            return allSelectors[platform] || {};
+        } catch (e) {
+            console.error(`❌ Error loading selectors for ${this.name}:`, e.message);
+            return {};
+        }
     }
 
     async start() {

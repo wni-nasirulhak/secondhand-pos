@@ -6,24 +6,24 @@ const BaseLiveScraper = require('./base_plugin');
  */
 class ShopeePlugin extends BaseLiveScraper {
     constructor(page, config) {
-        super(page, config);
-        this.name = 'Shopee';
+        super(page, config, 'Shopee');
     }
 
     async extractComments() {
         const page = this.page;
-        const extractionFn = () => {
+        const selectors = this.selectors;
+        const extractionFn = (sel) => {
             const results = [];
             // Selectors based on research
-            const messageContainers = document.querySelectorAll('.shopee-live-chat-panel__item');
+            const messageContainers = document.querySelectorAll(sel.chat_message_container);
             
             messageContainers.forEach(container => {
                 try {
                     // Skip system messages
                     if (container.classList.contains('shopee-live-chat-panel__item-system-msg')) return;
 
-                    const usernameEl = container.querySelector('.shopee-live-chat-panel__item-nickname');
-                    const commentEl = container.querySelector('.shopee-live-chat-panel__item-text');
+                    const usernameEl = container.querySelector(sel.username);
+                    const commentEl = container.querySelector(sel.comment_text);
                     
                     if (usernameEl && commentEl) {
                         const username = usernameEl.innerText.trim();
@@ -42,7 +42,7 @@ class ShopeePlugin extends BaseLiveScraper {
         };
 
         try {
-            return await page.evaluate(extractionFn);
+            return await page.evaluate(extractionFn, selectors);
         } catch (e) {
             console.error(`❌ Shopee Extraction Error: ${e.message}`);
             return [];
@@ -52,8 +52,8 @@ class ShopeePlugin extends BaseLiveScraper {
     async sendReply(message) {
         const page = this.page;
         try {
-            const inputSelector = '.shopee-live-chat-input__textarea';
-            const sendBtnSelector = '.shopee-live-chat-input__send-btn';
+            const inputSelector = this.selectors.input_field;
+            const sendBtnSelector = this.selectors.send_button;
 
             await page.waitForSelector(inputSelector, { timeout: 5000 });
             await page.click(inputSelector);

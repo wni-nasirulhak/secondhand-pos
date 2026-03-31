@@ -6,18 +6,18 @@ const BaseLiveScraper = require('./base_plugin');
  */
 class LazadaPlugin extends BaseLiveScraper {
     constructor(page, config) {
-        super(page, config);
-        this.name = 'Lazada';
+        super(page, config, 'Lazada');
     }
 
     async extractComments() {
         const page = this.page;
-        const extractionFn = () => {
+        const selectors = this.selectors;
+        const extractionFn = (sel) => {
             const results = [];
             // Target individual message items
             // Based on research, Lazada uses sc- prefixes or Ant Design classes
             // We'll use a mix of attribute selectors and children mapping
-            const messageItems = document.querySelectorAll('div[class^="sc-bwzfXH"]');
+            const messageItems = document.querySelectorAll(sel.chat_message_container);
             
             messageItems.forEach(item => {
                 try {
@@ -34,7 +34,7 @@ class LazadaPlugin extends BaseLiveScraper {
             });
 
             // Alternative: check AntD if applicable
-            const antMsgs = document.querySelectorAll('.ant-list-item-meta-title');
+            const antMsgs = document.querySelectorAll(sel.username_alt);
             antMsgs.forEach(meta => {
                 const username = meta.innerText.trim();
                 const content = meta.nextElementSibling?.innerText.trim();
@@ -47,7 +47,7 @@ class LazadaPlugin extends BaseLiveScraper {
         };
 
         try {
-            return await page.evaluate(extractionFn);
+            return await page.evaluate(extractionFn, selectors);
         } catch (e) {
             console.error(`❌ Lazada Extraction Error: ${e.message}`);
             return [];
@@ -58,8 +58,8 @@ class LazadaPlugin extends BaseLiveScraper {
         const page = this.page;
         try {
             // Lazada PC uses Ant Design input
-            const inputSelector = 'input.ant-input, .ant-input-textarea';
-            const sendBtnSelector = 'button.ant-btn';
+            const inputSelector = this.selectors.input_field;
+            const sendBtnSelector = this.selectors.send_button;
 
             await page.waitForSelector(inputSelector, { timeout: 5000 });
             await page.fill(inputSelector, message);

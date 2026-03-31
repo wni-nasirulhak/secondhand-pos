@@ -248,6 +248,13 @@ export class ConfigForm {
                     <select id="chrome-profile-select" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); display: none; margin-bottom: 10px;">
                         <option value="">-- เลือก Profile --</option>
                     </select>
+
+                    <div id="saved-profiles-group" style="margin-top: 10px;">
+                        <label style="font-size: 13px; color: var(--text-secondary);">👤 โปรไฟล์ที่บันทึกไว้ในระบบ (Saved Profiles)</label>
+                        <select id="saved-profiles-select" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); margin-top: 5px;">
+                            <option value="">-- เลือกจากโปรไฟล์ที่บันทึกไว้ --</option>
+                        </select>
+                    </div>
                     <input 
                         type="text" 
                         id="chrome-path" 
@@ -497,6 +504,46 @@ export class ConfigForm {
             });
         }
 
+        // Saved profiles selection
+        const savedProfilesSelect = this.container.querySelector('#saved-profiles-select');
+        if (savedProfilesSelect) {
+            savedProfilesSelect.addEventListener('change', (e) => {
+                const chromePathInput = this.container.querySelector('#chrome-path');
+                if (chromePathInput && e.target.value) {
+                    chromePathInput.value = e.target.value;
+                    this.showNotification(`👤 เลือกโปรไฟล์: ${e.target.options[e.target.selectedIndex].text}`, 'success');
+                }
+            });
+        }
+
+        // Listen for profile-selected event from ProfileManager
+        window.addEventListener('profile-selected', (e) => {
+            const path = e.detail.name; // In our system, the name is the folder name in user-profiles
+            const chromePathInput = this.container.querySelector('#chrome-path');
+            const authModeSelect = this.container.querySelector('#auth-mode');
+            
+            if (chromePathInput) {
+                // Determine full path
+                const fullPath = `user-profiles\\${path}`;
+                chromePathInput.value = fullPath;
+                
+                // Switch to chrome mode automatically
+                if (authModeSelect) {
+                    authModeSelect.value = 'chrome';
+                    authModeSelect.dispatchEvent(new Event('change'));
+                }
+                
+                this.showNotification(`✅ เลือกโปรไฟล์ ${path} แล้ว`, 'success');
+                
+                // Switch tab to Scraper
+                const scraperTab = document.querySelector('[data-tab="scraper"]');
+                if (scraperTab) scraperTab.click();
+            }
+        });
+
+        // Initialize saved profiles list
+        this.loadSavedProfiles();
+
         // Auto-save on change
         const inputs = this.container.querySelectorAll('input, select, textarea');
         inputs.forEach(input => {
@@ -668,6 +715,25 @@ export class ConfigForm {
         }
     }
 
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type} show`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: ${type === 'success' ? '#00d97e' : type === 'error' ? '#f46a6a' : '#25f4ee'};
+            color: white;
+            border-radius: 8px;
+            z-index: 11000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        `;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
+
     async loadChromeProfiles() {
         const btnLoadProfiles = this.container.querySelector('#btn-load-profiles');
         const profileSelect = this.container.querySelector('#chrome-profile-select');
@@ -818,6 +884,27 @@ export class ConfigForm {
     enable() {
         const inputs = this.container.querySelectorAll('input, select, textarea, button');
         inputs.forEach(input => input.disabled = false);
+    }
+
+    async loadSavedProfiles() {
+        const select = this.container.querySelector('#saved-profiles-select');
+        if (!select) return;
+
+        try {
+            const response = await fetch('/api/profiles');
+            const data = await response.json();
+            if (data.success && data.profiles) {
+                select.innerHTML = '<option value="">-- เลือกจากโปรไฟล์ที่บันทึกไว้ --</option>';
+                data.profiles.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = `user-profiles\\${p.name}`;
+                    option.textContent = p.name;
+                    select.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Failed to load saved profiles:', error);
+        }
     }
 
     autoSave() {

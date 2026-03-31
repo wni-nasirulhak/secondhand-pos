@@ -16,8 +16,9 @@ from playwright.sync_api import sync_playwright, Page, Browser
 from comment_filter import CommentFilter, load_filter_config
 
 # Paths
-PROJECT_ROOT = Path(__file__).parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 CONFIG_FILE = PROJECT_ROOT / "config" / "scraper_config.json"
+FILTER_CONFIG = PROJECT_ROOT / "config" / "filter_config.json"
 DATA_DIR = PROJECT_ROOT / "data" / "comments"
 LOG_DIR = PROJECT_ROOT / "logs"
 
@@ -39,9 +40,9 @@ class TikTokAutoReplySystem:
         
         # Load comment filter
         try:
-            filter_config = load_filter_config("filter_config.json")
+            filter_config = load_filter_config(str(FILTER_CONFIG))
             self.comment_filter = CommentFilter(filter_config.get("comment_filter"))
-            self.logger.info("✅ Comment Filter loaded")
+            self.logger.info(f"✅ Comment Filter loaded from {FILTER_CONFIG}")
         except Exception as e:
             self.logger.warning(f"⚠️  Using default filter config: {e}")
             self.comment_filter = CommentFilter()

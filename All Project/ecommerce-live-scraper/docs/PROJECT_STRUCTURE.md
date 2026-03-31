@@ -28,44 +28,40 @@
 
 ---
 
-## 📂 โฟลเดอร์
+## 📂 โครงสร้างโปรเจค (ใหม่)
 
 ```
 tiktok-live-scraper/
 │
-├── 🤖 Core Files (ใช้งานจริง)
+├── 🤖 scripts/python/           # รวมไฟล์ Python ทั้งหมด
 │   ├── auto_reply_system.py       # ระบบหลัก ⭐
 │   ├── webhook_server.py           # Webhook Server
 │   ├── comment_filter.py           # Comment Filter
 │   ├── test_webhook.py             # Testing tool
+│   └── requirements.txt            # Python dependencies
+│
+├── ⚙️ config/                   # ไฟล์ตั้งค่า
+│   ├── scraper_config.json         # Main config
+│   └── filter_config.json          # Filter config
+│
+├── 🚀 bin/                      # ไฟล์รันระบบ (Executable/Batch)
 │   └── run_auto_reply.bat          # Quick start
 │
-├── ⚙️ Configuration
-│   ├── config/
-│   │   └── scraper_config.json     # Main config
-│   ├── filter_config.json          # Filter config
-│   └── .env                        # Credentials (optional)
-│
-├── 📖 Documentation
-│   ├── README.md
+├── 📖 docs/                     # คู่มือการใช้งาน
 │   ├── LOGIN_README.md
 │   ├── QUICK_START.md
-│   └── PROJECT_STRUCTURE.md
+│   └── PROJECT_STRUCTURE.md        # ไฟล์นี้
 │
-├── 💾 Data (สร้างอัตโนมัติ)
-│   ├── data/
-│   │   └── comments/
-│   │       └── YYYY-MM-DD.json     # คอมเมนต์ที่เก็บไว้
-│   └── logs/
-│       └── auto_reply_YYYY-MM-DD.log
+├── 💾 data/                     # ข้อมูลที่สร้างอัตโนมัติ
+│   └── comments/                   # ประวัติคอมเมนต์
 │
-├── 🗄️ Archive (ไฟล์เก่า - ไม่ใช้แล้ว)
-│   ├── reply_bot.py                # ⚠️ เก่า
-│   ├── run_working.bat             # ⚠️ เก่า
-│   ├── scrape_live_working.py      # ⚠️ เก่า
-│   └── scrape_with_login.py        # ⚠️ เก่า
+├── 📝 logs/                     # ประวัติ Log
 │
-└── requirements.txt                # Python dependencies
+├── 🌐 public/                   # Frontend UI (Web interface)
+├── 📦 node_modules/             # Node.js dependencies
+├── server.js                   # Main Node.js Server ⭐
+├── package.json                # Node.js config
+└── README.md                   # หน้าหลักโปรเจค
 ```
 
 ---
@@ -74,17 +70,17 @@ tiktok-live-scraper/
 
 ### 1. เปิด Webhook Server
 ```bash
-python webhook_server.py
+python scripts/python/webhook_server.py
 ```
 
 ### 2. รัน Auto Reply System
 ```bash
-python auto_reply_system.py --duration 600 --visible
+python scripts/python/auto_reply_system.py --duration 600 --visible
 ```
 
 หรือใช้ batch file:
 ```bash
-run_auto_reply.bat
+bin/run_auto_reply.bat
 ```
 
 ---
@@ -92,7 +88,7 @@ run_auto_reply.bat
 ## 🔧 การปรับแต่ง
 
 ### ปรับ Filter (กรองคอมเมนต์)
-แก้ไข: **`filter_config.json`**
+แก้ไข: **`config/filter_config.json`**
 
 ```json
 {
@@ -103,7 +99,7 @@ run_auto_reply.bat
 ```
 
 ### ปรับ AI Replies
-แก้ไข: **`webhook_server.py`** → ฟังก์ชัน `generate_reply()`
+แก้ไข: **`scripts/python/webhook_server.py`** → ฟังก์ชัน `generate_reply()`
 
 ### ปรับ Live URL
 แก้ไข: **`config/scraper_config.json`**

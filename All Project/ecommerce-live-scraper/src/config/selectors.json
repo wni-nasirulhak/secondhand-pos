@@ -1,0 +1,21 @@
+{
+  "tiktok": {
+    "chat_message_container": "div[data-e2e=\"chat-message\"]",
+    "username": "[data-e2e=\"message-owner-name\"]",
+    "input_field": "div[data-e2e=\"room-chat-input-field\"]",
+    "send_button": "div[data-e2e=\"room-chat-send-btn\"]"
+  },
+  "shopee": {
+    "chat_message_container": ".shopee-live-chat-panel__item",
+    "username": ".shopee-live-chat-panel__item-nickname",
+    "comment_text": ".shopee-live-chat-panel__item-text",
+    "input_field": ".shopee-live-chat-input__textarea",
+    "send_button": ".shopee-live-chat-input__send-btn"
+  },
+  "lazada": {
+    "chat_message_container": "div[class^=\"sc-bwzfXH\"]",
+    "username_alt": ".ant-list-item-meta-title",
+    "input_field": "input.ant-input, .ant-input-textarea",
+    "send_button": "button.ant-btn"
+  }
+}

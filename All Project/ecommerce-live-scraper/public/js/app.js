@@ -15,6 +15,7 @@ import { WebhookManager } from './components/WebhookManager.js';
 import { AIWebhookManager } from './components/AIWebhookManager.js';
 import { SessionManager } from './components/SessionManager.js';
 import { MockRulesEditor } from './components/MockRulesEditor.js';
+import { ProfileManager } from './components/ProfileManager.js';
 
 class App {
     constructor() {
@@ -146,6 +147,15 @@ class App {
         if (mockRulesContainer) {
             this.mockRulesEditor = new MockRulesEditor(
                 mockRulesContainer,
+                this.api
+            );
+        }
+
+        // Profile Manager (Phase 2)
+        const profilesContainer = document.getElementById('profiles-container');
+        if (profilesContainer) {
+            this.profileManager = new ProfileManager(
+                profilesContainer,
                 this.api
             );
         }

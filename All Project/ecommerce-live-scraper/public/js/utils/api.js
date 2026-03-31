@@ -94,4 +94,22 @@ export class API {
             body: JSON.stringify(rules)
         });
     }
+
+    // Profile Management
+    async getProfiles() {
+        return this.request('/api/profiles');
+    }
+
+    async saveProfile(name) {
+        return this.request('/api/profiles', {
+            method: 'POST',
+            body: JSON.stringify({ name })
+        });
+    }
+
+    async deleteProfile(name) {
+        return this.request(`/api/profiles/${name}`, {
+            method: 'DELETE'
+        });
+    }
 }
