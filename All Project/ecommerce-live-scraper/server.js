@@ -3,6 +3,11 @@ const express = require('express');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs').promises;
+
+console.log('=========================================');
+console.log('🚀 TRUTH TRAP: SERVER VERSION 2.5.0 ACTIVE');
+console.log('📁 PATH:', __filename);
+console.log('=========================================');
 const https = require('https');
 const http = require('http');
 const readline = require('readline');
@@ -438,20 +443,27 @@ app.post('/api/start', async (req, res) => {
 // เช็คสถานะคุกกี้
 app.get('/api/check-cookies', async (req, res) => {
     try {
-        const platform = req.query.platform || 'tiktok';
+        // Ensure platform is correctly identified and trimmed
+        let platform = (req.query.platform || '').toLowerCase().trim();
+        
+        // If empty or explicitly tiktok, set to tiktok. Otherwise don't fallback to tiktok.
+        if (!platform || platform === 'undefined') platform = 'tiktok';
+        
         const storageStatePath = path.join(__dirname, 'storage-states', `${platform}.json`);
         
-        console.log(`🍪 Checking ${platform} cookies at:`, storageStatePath);
+        console.log(`[Cookies] Checking status for [${platform}] at: ${storageStatePath}`);
         
-        if (!require('fs').existsSync(storageStatePath)) {
-            console.log(`🍪 ${platform} cookie file not found`);
+        const fsSync = require('fs');
+        if (!fsSync.existsSync(storageStatePath)) {
+            console.log(`[Cookies] ${platform} not found on disk.`);
             return res.json({ exists: false });
         }
         
-        const storageState = JSON.parse(await fs.readFile(storageStatePath, 'utf-8'));
+        const content = await fs.readFile(storageStatePath, 'utf-8');
+        const storageState = JSON.parse(content);
         const cookies = storageState.cookies || [];
         
-        console.log(`🍪 Found ${cookies.length} cookies`);
+        console.log(`[Cookies] Result for ${platform}: found ${cookies.length} cookies`);
         
         if (cookies.length === 0) {
             return res.json({ exists: false });

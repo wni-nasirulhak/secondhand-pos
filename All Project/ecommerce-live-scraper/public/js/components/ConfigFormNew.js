@@ -39,7 +39,31 @@ export class ConfigForm {
                         <span class="label-icon">📱</span>
                         เลือกแพลตฟอร์ม (Platform)
                     </label>
-                    <div class="platform-selector" style="display: flex; gap: 10px; margin: 10px 0; flex-wrap: wrap;">
+                        <style>
+                            .platform-badge {
+                                cursor: pointer;
+                                padding: 8px 16px;
+                                border-radius: 12px;
+                                background: rgba(255, 255, 255, 0.05);
+                                border: 1px solid rgba(255, 255, 255, 0.1);
+                                font-size: 13px;
+                                transition: all 0.3s ease;
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                                color: var(--text-secondary);
+                            }
+                            .platform-badge:hover {
+                                background: rgba(255, 255, 255, 0.1);
+                                transform: translateY(-2px);
+                            }
+                            .platform-badge.active {
+                                background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+                                border-color: transparent;
+                                color: white;
+                                box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+                            }
+                        </style>
                         <div class="platform-badge active" data-platform="tiktok"><i class="fab fa-tiktok"></i> TikTok</div>
                         <div class="platform-badge" data-platform="shopee"><i class="fas fa-shopping-bag"></i> Shopee</div>
                         <div class="platform-badge" data-platform="lazada"><i class="fas fa-heart"></i> Lazada</div>
@@ -179,9 +203,9 @@ export class ConfigForm {
                         <div class="platform-badge-mini active" data-cookie-platform="tiktok" style="padding: 4px 10px; border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; font-size: 11px; border: 1px solid var(--border-color);">TikTok</div>
                         <div class="platform-badge-mini" data-cookie-platform="shopee" style="padding: 4px 10px; border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; font-size: 11px; border: 1px solid var(--border-color);">Shopee</div>
                         <div class="platform-badge-mini" data-cookie-platform="lazada" style="padding: 4px 10px; border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; font-size: 11px; border: 1px solid var(--border-color);">Lazada</div>
-                        <div class="platform-badge-mini" data-cookie-platform="facebook" style="padding: 4px 10px; border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; font-size: 11px; border: 1px solid var(--border-color);">FB</div>
-                        <div class="platform-badge-mini" data-cookie-platform="instagram" style="padding: 4px 10px; border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; font-size: 11px; border: 1px solid var(--border-color);">IG</div>
-                        <div class="platform-badge-mini" data-cookie-platform="youtube" style="padding: 4px 10px; border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; font-size: 11px; border: 1px solid var(--border-color);">YT</div>
+                        <div class="platform-badge-mini" data-cookie-platform="facebook" style="padding: 4px 10px; border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; font-size: 11px; border: 1px solid var(--border-color);">Facebook</div>
+                        <div class="platform-badge-mini" data-cookie-platform="instagram" style="padding: 4px 10px; border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; font-size: 11px; border: 1px solid var(--border-color);">Instagram</div>
+                        <div class="platform-badge-mini" data-cookie-platform="youtube" style="padding: 4px 10px; border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; font-size: 11px; border: 1px solid var(--border-color);">YouTube</div>
                     </div>
 
                     <style>
@@ -196,8 +220,8 @@ export class ConfigForm {
                         <!-- Status will be inserted here -->
                     </div>
 
-                    <div id="cookie-detection-alert" style="display: none; background: rgba(108, 92, 231, 0.1); border: 1px dashed #6c5ce7; padding: 8px; border-radius: 6px; margin-bottom: 8px; font-size: 11px; color: #a29bfe;">
-                        ✨ ตรวจพบว่าเป็นของ <strong id="detected-platform-name">...</strong> สลับให้แล้ว!
+                    <div id="cookie-detection-alert" style="display: none; background: rgba(108, 92, 231, 0.15); border: 1px solid rgba(138, 75, 175, 0.3); padding: 12px; border-radius: 10px; margin-bottom: 12px; font-size: 13px; color: #d088ff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); backdrop-filter: blur(10px); animation: slideTitleIn 0.3s ease;">
+                        ✨ ตรวจพบว่าเป็นของ <strong id="detected-platform-name" style="color: #fff; text-decoration: underline;">...</strong> (ระบบสลับแพลตฟอร์มให้อัตโนมัติ)
                     </div>
 
                     <textarea 
@@ -495,10 +519,56 @@ export class ConfigForm {
                 else if (val.includes('youtube.com') || val.includes('youtu.be')) detected = 'youtube';
 
                 if (detected) {
+                    // Update main badges (Basic Settings)
                     badges.forEach(b => {
                         b.classList.toggle('active', b.dataset.platform === detected);
                     });
+
+                    // Sync with Cookie Manager mini badges
+                    const cookieBadges = this.container.querySelectorAll('.platform-badge-mini');
+                    const currentPlatLabel = this.container.querySelector('#current-import-platform');
+                    
+                    if (detected !== this.currentCookiePlatform) {
+                        this.currentCookiePlatform = detected;
+                        cookieBadges.forEach(b => b.classList.toggle('active', b.dataset.cookiePlatform === detected));
+                        if (currentPlatLabel) currentPlatLabel.textContent = detected;
+                        
+                        // Show detection alert in cookie manager if pasted in URL bar
+                        const detectionAlert = this.container.querySelector('#cookie-detection-alert');
+                        const detectedLabel = this.container.querySelector('#detected-platform-name');
+                        if (detectionAlert && detectedLabel) {
+                            detectedLabel.textContent = detected.toUpperCase();
+                            detectionAlert.style.display = 'block';
+                            setTimeout(() => { 
+                                const alert = this.container.querySelector('#cookie-detection-alert');
+                                if (alert) alert.style.display = 'none'; 
+                            }, 5000);
+                        }
+                        
+                        // Update cookie status for newly detected platform
+                        this.checkCookieStatus(detected);
+                    }
                 }
+            });
+
+            // Also make main badges interactive
+            badges.forEach(b => {
+                b.style.cursor = 'pointer';
+                b.addEventListener('click', () => {
+                    const platform = b.dataset.platform;
+                    badges.forEach(badge => badge.classList.toggle('active', badge.dataset.platform === platform));
+                    
+                    // Sync to cookie manager
+                    this.currentCookiePlatform = platform;
+                    const cookieBadges = this.container.querySelectorAll('.platform-badge-mini');
+                    cookieBadges.forEach(mini => mini.classList.toggle('active', mini.dataset.cookiePlatform === platform));
+                    const currentPlatLabel = this.container.querySelector('#current-import-platform');
+                    if (currentPlatLabel) currentPlatLabel.textContent = platform;
+                    
+                    this.checkCookieStatus(platform);
+                    
+                    // Auto-detect URL from clipboard if empty? or just standard behavior
+                });
             });
         }
     }
@@ -507,8 +577,10 @@ export class ConfigForm {
         const statusDiv = this.container.querySelector('#cookie-status');
         if (!statusDiv) return;
 
+        console.log(`[Frontend] Checking cookie status for: ${platform}`);
         try {
             const data = await this.api.checkCookies(platform);
+            console.log(`[Frontend] Cookie data received for ${platform}:`, data);
 
             if (data.exists) {
                 if (data.valid) {
