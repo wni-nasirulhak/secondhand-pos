@@ -25,6 +25,7 @@ class App {
         this.recentURLsManager = new RecentURLsManager(this.storage);
         this.pollInterval = null;
         this.statusInterval = null;
+        this.healthInterval = null;
         this.activeSessionId = null;
         this.init();
     }
@@ -44,6 +45,17 @@ class App {
         // Auto-save config
         this.configForm.onConfigChange = (config) => {
             this.storage.set('last_config', config);
+            
+            // Sync VIP users to CommentList
+            if (this.commentList && config.vipUsers) {
+                this.commentList.setVipUsers(config.vipUsers);
+            }
+            
+            // Sync VIP users to KeywordAlert
+            if (this.keywordAlert) {
+                this.keywordAlert.setVipUsers(config.vipUsers);
+                this.keywordAlert.setVipOnlyNotify(config.vipOnlyNotify);
+            }
         };
 
         this.statusBar = new StatusBar(
@@ -163,12 +175,22 @@ class App {
         // โหลดสถานะเริ่มต้น
         this.checkStatus();
         this.startStatusPolling();
+        this.startHealthPolling();
     }
 
     loadLastConfig() {
         const lastConfig = this.storage.get('last_config');
         if (lastConfig) {
             this.configForm.setConfig(lastConfig);
+            
+            // Initial sync
+            if (this.commentList && lastConfig.vipUsers) {
+                this.commentList.setVipUsers(lastConfig.vipUsers);
+            }
+            if (this.keywordAlert) {
+                this.keywordAlert.setVipUsers(lastConfig.vipUsers);
+                this.keywordAlert.setVipOnlyNotify(lastConfig.vipOnlyNotify);
+            }
         }
     }
 
@@ -233,6 +255,11 @@ class App {
         // Add webhooks from WebhookManager
         if (this.webhookManager) {
             config.webhooks = this.webhookManager.getEnabledWebhooks();
+        }
+
+        // Add keywords for backend webhook filtering
+        if (this.keywordAlert) {
+            config.keywords = this.keywordAlert.getKeywords();
         }
 
         // Add AI Webhook URL from AIWebhookManager
@@ -343,6 +370,24 @@ class App {
     startStatusPolling() {
         if (this.statusInterval) clearInterval(this.statusInterval);
         this.statusInterval = setInterval(() => this.checkStatus(), 5000);
+    }
+
+    startHealthPolling() {
+        if (this.healthInterval) clearInterval(this.healthInterval);
+        this.healthInterval = setInterval(() => this.pollHealth(), 5000);
+        this.pollHealth();
+    }
+
+    async pollHealth() {
+        if (!this.statsDashboard) return;
+        try {
+            const result = await this.api.getSystemHealth();
+            if (result.success) {
+                this.statsDashboard.updateSystemHealth(result);
+            }
+        } catch (error) {
+            console.error('Error polling health:', error);
+        }
     }
 
     handleDownload(format) {

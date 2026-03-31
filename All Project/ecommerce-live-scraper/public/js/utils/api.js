@@ -112,4 +112,9 @@ export class API {
             method: 'DELETE'
         });
     }
+
+    // System Health
+    async getSystemHealth() {
+        return this.request('/api/system/health');
+    }
 }

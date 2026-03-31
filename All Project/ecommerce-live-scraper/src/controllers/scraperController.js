@@ -1,6 +1,8 @@
 const path = require('path');
 const fs = require('fs').promises;
 const fsSync = require('fs');
+const exportHelper = require('../utils/exportHelper');
+const sessionService = require('../services/sessionService');
 
 async function checkCookies(req, res) {
     try {
@@ -54,7 +56,57 @@ async function importCookies(req, res) {
     }
 }
 
+async function exportToExcel(req, res) {
+    try {
+        const { sessionId } = req.params;
+        const session = sessionService.getSession(sessionId);
+        
+        if (!session) {
+            return res.status(404).json({ success: false, error: 'Session not found' });
+        }
+
+        const buffer = exportHelper.generateExcelBuffer(session.comments);
+        if (!buffer) {
+            return res.status(500).json({ success: false, error: 'Failed to generate Excel' });
+        }
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=comments_${sessionId}.xlsx`);
+        res.send(buffer);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+async function exportHistoryToExcel(req, res) {
+    try {
+        const { filename } = req.params;
+        const DATA_DIR = path.join(process.cwd(), 'data', 'comments');
+        const filepath = path.join(DATA_DIR, filename);
+
+        if (!fsSync.existsSync(filepath)) {
+            return res.status(404).json({ success: false, error: 'History file not found' });
+        }
+
+        const content = await fs.readFile(filepath, 'utf8');
+        const comments = JSON.parse(content);
+
+        const buffer = exportHelper.generateExcelBuffer(comments);
+        if (!buffer) {
+            return res.status(500).json({ success: false, error: 'Failed to generate Excel' });
+        }
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename.replace('.json', '.xlsx')}`);
+        res.send(buffer);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+}
+
 module.exports = {
     checkCookies,
-    importCookies
+    importCookies,
+    exportToExcel,
+    exportHistoryToExcel
 };

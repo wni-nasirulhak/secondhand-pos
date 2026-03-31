@@ -21,6 +21,8 @@ function createSession(sessionId, url, config) {
         config,
         comments: [],
         startTime: Date.now(),
+        lastActivity: Date.now(),
+        lastStatus: 'starting',
         process: null
     };
     sessions.set(sessionId, session);
@@ -57,6 +59,16 @@ function addCommentToSession(sessionId, comment) {
         });
         if (session.comments.length > 5000) session.comments.shift();
     }
+    session.lastActivity = Date.now();
+    session.lastStatus = 'scraping';
+}
+
+function updateSessionStatus(sessionId, status) {
+    const session = sessions.get(sessionId);
+    if (session) {
+        session.lastStatus = status;
+        session.lastActivity = Date.now();
+    }
 }
 
 async function saveSessionComments(sessionId) {
@@ -85,5 +97,6 @@ module.exports = {
     createSession,
     stopSession,
     addCommentToSession,
+    updateSessionStatus,
     saveSessionComments
 };

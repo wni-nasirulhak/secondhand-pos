@@ -10,6 +10,8 @@ const systemController = require('../controllers/systemController');
 // Scraper Routes
 router.get('/check-cookies', scraperController.checkCookies);
 router.post('/import-cookies', scraperController.importCookies);
+router.get('/export/:sessionId', scraperController.exportToExcel);
+router.get('/export/history/:filename', scraperController.exportHistoryToExcel);
 
 // Session Routes
 router.post('/start', sessionController.startScraper);

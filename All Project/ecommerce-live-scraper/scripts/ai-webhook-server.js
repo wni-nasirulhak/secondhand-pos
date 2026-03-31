@@ -82,24 +82,54 @@ function generateMockReply(username, comment) {
 
     // 2. Loop through Rule Engine
     for (const rule of MOCK_RULES) {
-        if (rule.keywords && rule.keywords.some(kw => lower.includes(kw.toLowerCase()))) {
+        if (!rule.keywords || rule.keywords.length === 0) continue;
+
+        let matchedKeyword = null;
+        
+        if (rule.useRegex) {
+            // Regex matching
+            for (const kw of rule.keywords) {
+                try {
+                    const regex = new RegExp(kw, 'i');
+                    if (regex.test(comment)) {
+                        matchedKeyword = kw;
+                        break;
+                    }
+                } catch (e) {
+                    console.error(`❌ Invalid Regex [${kw}]:`, e.message);
+                }
+            }
+        } else {
+            // Normal string matching
+            matchedKeyword = rule.keywords.find(kw => lower.includes(kw.toLowerCase()));
+        }
+
+        if (matchedKeyword) {
             if (rule.replies && rule.replies.length > 0) {
                 const randomIndex = Math.floor(Math.random() * rule.replies.length);
-                const reply = rule.replies[randomIndex];
-                return reply.replace('@username', `@${username}`);
+                let reply = rule.replies[randomIndex];
+                
+                // Template Replacement
+                reply = reply
+                    .replace(/{username}/g, `@${username}`)
+                    .replace(/@username/g, `@${username}`) // Legacy support
+                    .replace(/{keyword}/g, matchedKeyword);
+                
+                return reply;
             }
         }
     }
 
     // 3. Fallback: Default random replies
     const defaultReplies = [
-        `@${username} ขอบคุณที่คอมเมนต์นะครับ 🙏`,
-        `@${username} เห็นคอมเมนต์แล้วครับ! 😊`,
-        `@${username} ขอบคุณมากๆ เลยนะครับ ❤️`,
-        `@${username} ยินดีที่ได้คุยด้วยนะครับ ✨`,
-        `@${username} ขอบคุณที่ติดตามนะครับ 💖`,
+        `@{username} ขอบคุณที่คอมเมนต์นะครับ 🙏`,
+        `@{username} เห็นคอมเมนต์แล้วครับ! 😊`,
+        `@{username} ขอบคุณมากๆ เลยนะครับ ❤️`,
+        `@{username} ยินดีที่ได้คุยด้วยนะครับ ✨`,
+        `@{username} ขอบคุณที่ติดตามนะครับ 💖`,
     ];
-    return defaultReplies[Math.floor(Math.random() * defaultReplies.length)];
+    let fallbackReply = defaultReplies[Math.floor(Math.random() * defaultReplies.length)];
+    return fallbackReply.replace(/{username}/g, username);
 }
 
 // ========== OpenAI API ==========

@@ -111,8 +111,11 @@ export class CommentHistory {
                     <button class="btn btn-small" onclick="window.viewHistory('${this.escapeHtml(history.filename)}')" style="flex: 1; background: var(--accent-secondary);">
                         👁️ ดู
                     </button>
-                    <button class="btn btn-small" onclick="window.downloadHistory('${this.escapeHtml(history.filename)}')" style="flex: 1; background: #00d97e;">
-                        📥 ดาวน์โหลด
+                    <button class="btn btn-small" onclick="window.downloadHistory('${this.escapeHtml(history.filename)}')" style="background: #00d97e;" title="Download JSON">
+                        JSON
+                    </button>
+                    <button class="btn btn-small" onclick="window.exportHistoryToExcel('${this.escapeHtml(history.filename)}')" style="background: #207245;" title="Export to Excel">
+                        XLSX
                     </button>
                     <button class="btn btn-small" onclick="window.deleteHistory('${this.escapeHtml(history.filename)}')" style="background: #f46a6a;">
                         🗑️
@@ -124,7 +127,12 @@ export class CommentHistory {
         // Setup global handlers
         window.viewHistory = (filename) => this.viewHistory(filename);
         window.downloadHistory = (filename) => this.downloadHistory(filename);
+        window.exportHistoryToExcel = (filename) => this.exportHistoryToExcel(filename);
         window.deleteHistory = (filename) => this.deleteHistory(filename);
+    }
+
+    exportHistoryToExcel(filename) {
+        window.open(`/api/export/history/${encodeURIComponent(filename)}`, '_blank');
     }
 
     async viewHistory(filename) {

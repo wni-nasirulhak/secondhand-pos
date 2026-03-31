@@ -320,6 +320,37 @@ export class ConfigForm {
             }, 100);
         }, '💬');
 
+        // ============ Filtering & VIP ============
+        this.accordion.addSection('การคัดกรอง & VIP', (contentDiv) => {
+            contentDiv.innerHTML = `
+                <div class="form-group">
+                    <label for="vip-users">
+                        <span class="label-icon">⭐</span>
+                        รายชื่อ VIP / ลูกค้าประจำ
+                    </label>
+                    <textarea 
+                        id="vip-users" 
+                        placeholder="ใส่ชื่อ username (ไม่ต้องมี @) แยกด้วยเครื่องหมายจุลภาค (,) เช่น user1, user2, customer_01"
+                        style="width: 100%; height: 80px; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: monospace; font-size: 13px;"
+                    ></textarea>
+                    <small style="color: var(--text-secondary);">📌 คอมเมนต์จากรายชื่อนี้จะถูกไฮไลท์เป็นสีทองและมีสถานะพิเศษ</small>
+                </div>
+
+                <div class="form-group checkbox-group" style="margin-top: 15px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="vip-only-notify" style="width: 18px; height: 18px; cursor: pointer;"/>
+                        <span>
+                            <span class="label-icon">🔔</span>
+                            แจ้งเตือนเฉพาะ VIP เท่านั้น (Override)
+                        </span>
+                    </label>
+                    <small style="display: block; margin-top: 5px; margin-left: 28px; color: var(--text-secondary);">
+                        เปิดเพื่อรับการแจ้งเตือนพุชเฉพาะเมื่อ VIP คอมเมนต์เท่านั้น
+                    </small>
+                </div>
+            `;
+        }, '⭐');
+
         // ============ Advanced Settings ============
         this.accordion.addSection('ตั้งค่าขั้นสูง', (contentDiv) => {
             contentDiv.innerHTML = `
@@ -799,7 +830,9 @@ export class ConfigForm {
             chromePath: chromePath,
             replyCooldown: replyCooldownInput ? parseInt(replyCooldownInput.value) : 5,
             replyOnQuestion: replyOnQuestionInput ? replyOnQuestionInput.checked : true,
-            hostUsername: this.container.querySelector('#host-username') ? this.container.querySelector('#host-username').value.trim() : ''
+            hostUsername: this.container.querySelector('#host-username') ? this.container.querySelector('#host-username').value.trim() : '',
+            vipUsers: this.container.querySelector('#vip-users') ? this.container.querySelector('#vip-users').value.trim() : '',
+            vipOnlyNotify: this.container.querySelector('#vip-only-notify') ? this.container.querySelector('#vip-only-notify').checked : false
         };
 
         // Add reply templates if in respond mode
@@ -852,7 +885,9 @@ export class ConfigForm {
             '#browser-engine': config.browser || 'chromium',
             '#reply-cooldown': config.replyCooldown || 5,
             '#reply-on-question': config.replyOnQuestion !== false,
-            '#host-username': config.hostUsername || ''
+            '#host-username': config.hostUsername || '',
+            '#vip-users': config.vipUsers || '',
+            '#vip-only-notify': config.vipOnlyNotify || false
         };
 
         Object.entries(fields).forEach(([selector, value]) => {

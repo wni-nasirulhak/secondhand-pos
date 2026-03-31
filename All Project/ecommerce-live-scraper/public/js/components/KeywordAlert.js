@@ -6,6 +6,8 @@ export class KeywordAlert {
         this.callbacks = callbacks;
         this.keywords = this.loadKeywords();
         this.alerts = [];
+        this.vipUsers = [];
+        this.vipOnlyNotify = false;
         this.render();
         this.attachEvents();
     }
@@ -20,56 +22,72 @@ export class KeywordAlert {
 
     render() {
         this.container.innerHTML = `
-            <div class="keyword-alert">
-                <div class="keyword-header">
-                    <h3>🔔 แจ้งเตือนคำสำคัญ</h3>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="keyword-enabled" ${this.keywords.length > 0 ? 'checked' : ''}>
-                        <span class="toggle-slider"></span>
-                    </label>
+            <div class="keyword-alert stack-y gap-md">
+                <div class="keyword-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0;">🔔 แจ้งเตือนคำสำคัญ (V2)</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button id="btn-request-notif" class="btn btn-secondary btn-small" style="font-size: 11px; display: none; background: rgba(37, 244, 238, 0.1); border-color: #25f4ee; color: #25f4ee;">
+                            🔓 เปิดแจ้งเตือน Desktop
+                        </button>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="keyword-enabled" ${this.keywords.length > 0 ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="keyword-input-group">
-                    <input 
-                        type="text" 
-                        id="keyword-input" 
-                        placeholder="พิมพ์คำสำคัญ แล้วกด Enter"
-                        autocomplete="off"
-                    />
-                    <button id="btn-add-keyword" class="btn btn-primary">
-                        <span class="btn-icon">➕</span>
-                        เพิ่ม
-                    </button>
+                <div class="alert-config-card" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                    <div class="keyword-input-group" style="display: flex; gap: 10px; margin-bottom: 12px;">
+                        <input 
+                            type="text" 
+                            id="keyword-input" 
+                            placeholder="พิมพ์คำสำคัญ (เช่น ราคา, พร้อมส่ง, CF)"
+                            autocomplete="off"
+                            style="flex: 1; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 14px;"
+                        />
+                        <button id="btn-add-keyword" class="btn btn-primary" style="padding: 10px 20px;">➕ เพิ่ม</button>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;">
+                        <select id="alert-sound-select" style="padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 13px; cursor: pointer;">
+                            <option value="success">🎵 Success Tone (Default)</option>
+                            <option value="alert">🚨 Urgent Alert</option>
+                            <option value="digital">👾 Digital Chime</option>
+                            <option value="bell">🔔 Crystal Bell</option>
+                            <option value="none">🚫 ปิดเสียง</option>
+                        </select>
+                        <button id="btn-test-sound" class="btn btn-secondary" style="padding: 10px 15px; background: var(--bg-primary); border: 1px solid var(--border-color);">🔊 ทดสอบ</button>
+                    </div>
                 </div>
 
-                <div id="keyword-list" class="keyword-list">
+                <div id="keyword-list" class="keyword-list" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 50px; padding: 12px; background: var(--bg-secondary); border-radius: 12px; border: 1px dashed var(--border-color); margin-bottom: 15px;">
                     ${this.keywords.length === 0 ? `
-                        <div class="empty-keywords">
-                            <span class="empty-icon">🔕</span>
-                            <p>ยังไม่มีคำสำคัญที่ต้องการแจ้งเตือน</p>
-                            <small>เพิ่มคำสำคัญเพื่อรับการแจ้งเตือนเมื่อมีคอมเมนต์ที่ตรงกัน</small>
+                        <div class="empty-keywords" style="width: 100%; text-align: center; color: var(--text-secondary); font-size: 13px; padding: 10px;">
+                            <span style="font-size: 24px; display: block; margin-bottom: 5px;">🔕</span>
+                            ยังไม่มีคำสำคัญที่ติดตาม...
                         </div>
                     ` : this.keywords.map((keyword, index) => `
-                        <div class="keyword-item" data-index="${index}">
-                            <span class="keyword-text">${this.escapeHtml(keyword)}</span>
-                            <button class="btn-remove-keyword" title="ลบ">
-                                <span>✖️</span>
-                            </button>
+                        <div class="keyword-item" data-index="${index}" style="background: var(--accent-primary); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 8px; animation: fadeIn 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <span class="keyword-text" style="font-weight: 600;">${this.escapeHtml(keyword)}</span>
+                            <button class="btn-remove-keyword" style="background: transparent; border: none; color: white; cursor: pointer; font-size: 14px; padding: 0; line-height: 1;">×</button>
                         </div>
                     `).join('')}
                 </div>
 
-                <div class="keyword-stats">
-                    <small>📊 ติดตาม ${this.keywords.length} คำสำคัญ | 🔔 แจ้งเตือนแล้ว ${this.alerts.length} ครั้ง</small>
+                <div class="keyword-stats" style="padding-top: 12px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <small style="color: var(--text-secondary); font-size: 12px;">📊 ติดตาม ${this.keywords.length} คำสำคัญ | 🔔 แจ้งเตือน ${this.alerts.length} ครั้ง</small>
+                    <button id="btn-clear-alerts" class="btn btn-secondary btn-small" style="font-size: 11px; padding: 5px 10px; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary);">🗑️ ล้างประวัติ</button>
                 </div>
 
                 <!-- Alert History -->
-                <div class="alert-history" id="alert-history" style="display: none;">
-                    <h4>📜 ประวัติการแจ้งเตือน</h4>
-                    <div id="alert-list" class="alert-list"></div>
+                <div class="alert-history" id="alert-history" style="display: none; margin-top: 15px; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; background: var(--bg-secondary);">
+                    <h4 style="margin: 0 0 12px 0; font-size: 14px; color: var(--accent-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">📜 รายการแจ้งเตือนล่าสุด</h4>
+                    <div id="alert-list" class="alert-list stack-y gap-sm" style="max-height: 200px; overflow-y: auto; padding-right: 5px;"></div>
                 </div>
             </div>
         `;
+
+        this.checkNotificationPermission();
     }
 
     attachEvents() {
@@ -77,8 +95,33 @@ export class KeywordAlert {
         const btnAdd = this.container.querySelector('#btn-add-keyword');
         const keywordList = this.container.querySelector('#keyword-list');
         const enabledToggle = this.container.querySelector('#keyword-enabled');
+        const btnTestSound = this.container.querySelector('#btn-test-sound');
+        const btnRequestNotif = this.container.querySelector('#btn-request-notif');
+        const btnClearAlerts = this.container.querySelector('#btn-clear-alerts');
+        const soundSelect = this.container.querySelector('#alert-sound-select');
 
-        // เพิ่มคำสำคัญ
+        // Restore sound selection
+        if (soundSelect) {
+            soundSelect.value = this.storage.get('alert_sound', 'success');
+            soundSelect.addEventListener('change', (e) => {
+                this.storage.set('alert_sound', e.target.value);
+            });
+        }
+
+        // Test sound
+        btnTestSound?.addEventListener('click', () => this.playAlertSound(true));
+
+        // Request notification permission
+        btnRequestNotif?.addEventListener('click', () => this.requestNotificationPermission());
+
+        // Clear alerts
+        btnClearAlerts?.addEventListener('click', () => {
+            if (confirm('ล้างประวัติการแจ้งเตือนทั้งหมด?')) {
+                this.clearAlerts();
+            }
+        });
+
+        // อื่นๆ (Original logic)
         btnAdd?.addEventListener('click', () => this.handleAddKeyword());
         input?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -86,7 +129,6 @@ export class KeywordAlert {
             }
         });
 
-        // ลบคำสำคัญ (Event delegation)
         keywordList?.addEventListener('click', (e) => {
             const removeBtn = e.target.closest('.btn-remove-keyword');
             if (removeBtn) {
@@ -96,12 +138,33 @@ export class KeywordAlert {
             }
         });
 
-        // Toggle เปิด/ปิด
         enabledToggle?.addEventListener('change', (e) => {
             if (this.callbacks.onToggle) {
                 this.callbacks.onToggle(e.target.checked);
             }
         });
+    }
+
+    checkNotificationPermission() {
+        const btn = this.container.querySelector('#btn-request-notif');
+        if (!btn) return;
+
+        if (Notification.permission === 'default') {
+            btn.style.display = 'inline-block';
+        } else {
+            btn.style.display = 'none';
+        }
+    }
+
+    async requestNotificationPermission() {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            new Notification('🚀 แจ้งเตือน Keyword เปิดใช้งานแล้ว!', {
+                body: 'คุณจะได้รับการแจ้งเตือนเมื่อมีคอมเมนต์ที่ตรงกับคีย์เวิร์ด',
+                icon: '/favicon.ico'
+            });
+        }
+        this.checkNotificationPermission();
     }
 
     handleAddKeyword() {
@@ -144,9 +207,35 @@ export class KeywordAlert {
         }
     }
 
+    setVipUsers(users) {
+        if (typeof users === 'string') {
+            this.vipUsers = users.split(',').map(u => u.trim().toLowerCase().replace(/^@/, '')).filter(u => u);
+        } else if (Array.isArray(users)) {
+            this.vipUsers = users.map(u => u.trim().toLowerCase().replace(/^@/, ''));
+        }
+    }
+
+    setVipOnlyNotify(enabled) {
+        this.vipOnlyNotify = !!enabled;
+    }
+
+    isVip(username) {
+        if (!username || !this.vipUsers || this.vipUsers.length === 0) return false;
+        const cleanName = username.trim().toLowerCase().replace(/^@/, '');
+        return this.vipUsers.includes(cleanName);
+    }
+
     checkComment(comment) {
         const enabled = this.container.querySelector('#keyword-enabled')?.checked;
-        if (!enabled || this.keywords.length === 0) {
+        if (!enabled) return false;
+
+        // VIP Override Logic
+        const isVipUser = this.isVip(comment.username);
+        if (this.vipOnlyNotify && !isVipUser) {
+            return false;
+        }
+
+        if (this.keywords.length === 0) {
             return false;
         }
 
@@ -179,6 +268,15 @@ export class KeywordAlert {
             this.callbacks.onAlert(alert);
         }
 
+        // Browser Notification
+        if (Notification.permission === 'granted') {
+            new Notification(`🔔 พบคีย์เวิร์ด: ${keyword}`, {
+                body: `@${comment.username}: ${comment.comment}`,
+                icon: '/favicon.ico',
+                silent: true // We play our own sound
+            });
+        }
+
         // เล่นเสียง (ถ้ามี)
         this.playAlertSound();
 
@@ -186,15 +284,23 @@ export class KeywordAlert {
         this.updateAlertHistory();
     }
 
-    playAlertSound() {
+    playAlertSound(isTest = false) {
         try {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBzJ+zPDTfjAGIHLD79yMPwoXZLnq7KVSEgxMpODuumEcBjiS1/LMe ');
-            audio.volume = 0.3;
-            audio.play().catch(() => {
-                // ไม่สามารถเล่นเสียงได้ (บางเบราว์เซอร์ต้องมี user interaction ก่อน)
-            });
+            const soundType = this.storage.get('alert_sound', 'success');
+            if (soundType === 'none' && !isTest) return;
+
+            const sounds = {
+                success: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBzJ+zPDTfjAGIHLD79yMPwoXZLnq7KVSEgxMpODuumEcBjiS1/LMe',
+                alert: 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YT9vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19',
+                digital: 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YAgAAABvT19vT19vT19vT19vT19vT19vT19vT19vT19',
+                bell: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBzJ+zPDTfjAGIHLD79yMPwoXZLnq7KVSEgxMpODuumEcBjiS1/LMe'
+            };
+
+            const audio = new Audio(sounds[soundType] || sounds.success);
+            audio.volume = 0.4;
+            audio.play().catch(() => {});
         } catch (error) {
-            // Ignore sound errors
+            console.error('Sound error:', error);
         }
     }
 

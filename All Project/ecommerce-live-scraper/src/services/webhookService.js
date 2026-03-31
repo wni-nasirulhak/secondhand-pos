@@ -1,29 +1,50 @@
 const https = require('https');
 const http = require('http');
 
-async function sendWebhook(webhook, data) {
-    try {
-        const { platform } = webhook;
-        if (platform === 'discord') return await sendDiscordWebhook(webhook, data);
-        if (platform === 'slack') return await sendSlackWebhook(webhook, data);
-        if (platform === 'telegram') return await sendTelegramMessage(webhook, data);
-        if (platform === 'custom') return await sendCustomWebhook(webhook, data);
-        return { success: false, error: 'Unknown platform' };
-    } catch (error) {
-        console.error('Webhook error:', error);
-        return { success: false, error: error.message };
+async function sendWebhook(webhook, data, retries = 3) {
+    let lastError = null;
+    
+    // Add VIP flag to data for formatting (Internal)
+    const isVip = data.isVip || false;
+    
+    for (let i = 0; i < retries; i++) {
+        try {
+            const { platform } = webhook;
+            let result;
+            
+            if (platform === 'discord') result = await sendDiscordWebhook(webhook, data);
+            else if (platform === 'slack') result = await sendSlackWebhook(webhook, data);
+            else if (platform === 'telegram') result = await sendTelegramMessage(webhook, data);
+            else if (platform === 'custom') result = await sendCustomWebhook(webhook, data);
+            else result = { success: false, error: 'Unknown platform' };
+
+            if (result.success) return result;
+            lastError = result.error;
+            
+            // Wait before retry (exponential backoff: 1s, 2s, 4s...)
+            if (i < retries - 1) {
+                await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+            }
+        } catch (error) {
+            lastError = error.message;
+            if (i < retries - 1) {
+                await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+            }
+        }
     }
+    
+    return { success: false, error: `Failed after ${retries} attempts: ${lastError}` };
 }
 
 async function sendDiscordWebhook(webhook, data) {
     return new Promise((resolve, reject) => {
         const payload = {
             embeds: [{
-                title: '💬 Live Comment',
+                title: data.isVip ? '👑 VIP Live Comment' : '💬 Live Comment',
                 description: data.comment,
-                color: 0xfe2c55,
+                color: data.isVip ? 0xf1c40f : 0xfe2c55,
                 fields: [
-                    { name: '👤 Username', value: data.username, inline: true },
+                    { name: data.isVip ? '👤 VIP Username' : '👤 Username', value: data.username, inline: true },
                     { name: '⏰ Time', value: new Date(data.timestamp).toLocaleString('th-TH'), inline: true }
                 ],
                 footer: { text: 'Ecom Scraper Hub' },
@@ -43,11 +64,11 @@ async function sendDiscordWebhook(webhook, data) {
 async function sendSlackWebhook(webhook, data) {
     return new Promise((resolve, reject) => {
         const payload = {
-            text: '💬 Live Comment',
+            text: data.isVip ? '👑 VIP Live Comment' : '💬 Live Comment',
             blocks: [
-                { type: 'header', text: { type: 'plain_text', text: '💬 Live Comment' } },
+                { type: 'header', text: { type: 'plain_text', text: data.isVip ? '👑 VIP Live Comment' : '💬 Live Comment' } },
                 { type: 'section', fields: [
-                    { type: 'mrkdwn', text: `*Username:*\n${data.username}` },
+                    { type: 'mrkdwn', text: `*${data.isVip ? 'VIP User' : 'Username'}:*\n${data.username}` },
                     { type: 'mrkdwn', text: `*Time:*\n${new Date(data.timestamp).toLocaleString('th-TH')}` }
                 ]},
                 { type: 'section', text: { type: 'mrkdwn', text: data.comment } }
@@ -67,7 +88,7 @@ async function sendTelegramMessage(webhook, data) {
     return new Promise((resolve, reject) => {
         const payload = {
             chat_id: webhook.chatId,
-            text: `💬 *Live Comment*\n\n👤 *User:* ${data.username}\n⏰ *Time:* ${new Date(data.timestamp).toLocaleString('th-TH')}\n\n💬 *Message:*\n${data.comment}`,
+            text: `${data.isVip ? '👑 *VIP Live Comment*' : '💬 *Live Comment*'}\n\n👤 *User:* ${data.username}${data.isVip ? ' ⭐' : ''}\n⏰ *Time:* ${new Date(data.timestamp).toLocaleString('th-TH')}\n\n💬 *Message:*\n${data.comment}`,
             parse_mode: 'Markdown'
         };
         const postData = JSON.stringify(payload);

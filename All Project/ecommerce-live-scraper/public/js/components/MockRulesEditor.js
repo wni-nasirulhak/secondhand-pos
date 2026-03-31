@@ -52,7 +52,9 @@ export class MockRulesEditor {
                         <strong>คำแนะนำ:</strong> <br>
                         - <b>คีย์เวิร์ด:</b> ใส่คำที่ลูกค้ามักจะพิมพ์ คั่นด้วยคอมมา (เช่น: ราคา, เท่าไหร่, กี่บาท) <br>
                         - <b>คำตอบ:</b> ใส่ประโยคที่ต้องการให้บอทตอบ 1 บรรทัดต่อ 1 ข้อความ (ระบบจะสุ่มคำท่ีใส่ไว้มาตอบ) <br>
-                        - ใช้ <b>@username</b> ในคำตอบเพื่อแท็กชื่อลูกค้า
+                        - ใช้ <b>{username}</b> ในคำตอบเพื่อแท็กชื่อลูกค้า (เช่น: สวัสดีครับ {username}) <br>
+                        - ใช้ <b>{keyword}</b> เพื่อแสดงคำสำคัญที่ถูกตรวจพบ <br>
+                        - เปิด <b>Regex</b> เพื่อใช้การค้นหาแบบสากล (สัญลักษณ์ทางเทคนิค)
                     </p>
                 </div>
             </div>
@@ -80,7 +82,8 @@ export class MockRulesEditor {
             { "category": "Order/CF", "keywords": ["cf", "รับ", "เอา", "จอง", "f", "เอาอันนี้", "รับค่ะ", "รับครับ", "สั่ง", "ยย", "โยนยอด", "จองไว้", "เก็บให้หน่อย", "เอาชิ้นนี้", "เอาตัวนี้", "สั่งซื้อ", "กดสั่งตรงไหน"], "replies": ["รับทราบครับ! แคปจอทักแชท หรือกดสั่งในตะกร้าได้เลยจ้า 🛒", "ขอบคุณที่อุดหนุนครับ! แอดมินจดออเดอร์ไว้แล้ว ทักแชทยืนยันได้เลย", "CF แล้วรบกวนทักแชทภายใน 10 นาทีเพื่อรับโปรนะครับ! 🔥", "ยอดเยี่ยมครับ! รับชิ้นนี้ไปไม่ผิดหวังแน่นอน"] },
             { "category": "Greeting", "keywords": ["สวัสดี", "หวัดดี", "hello", "hi", "มอนิ่ง", "ดีครับ", "ดีค่ะ", "หวัดดีจ้า", "ทักทาย", "สบายดี", "ยินดีที่ได้รู้จัก", "กินข้าวยัง", "มาแล้ว", "เข้าดูครั้งแรก"], "replies": ["สวัสดีครับคุณ @username ยินดีต้อนรับสู่ไลฟ์ครับ! 👋✨", "หวัดดีครับ! วันนี้มีของเด็ดๆ เพียบ อยู่ดูด้วยกันก่อนนะ", "Hello! ยินดีที่ได้รู้จักครับคุณ @username สนใจตัวไหนถามได้เลย", "สวัสดีรอบห้องครับ! ใครเข้ามาแล้วฝากกดหัวใจให้หน่อยนะ ❤️"] },
             { "category": "Compliment/Support", "keywords": ["รัก", "สวย", "ปัง", "ชอบ", "แชร์แล้ว", "หัวใจ", "สู้ๆ", "เก่ง", "น่ารัก", "หล่อ", "เจ๋ง", "เยี่ยม", "แชร์เพิ่ม", "เคาะหัวใจ", "ส่งกำลังใจ"], "replies": ["ขอบคุณมากครับคุณ @username น่ารักที่สุดเลย! ❤️🥰", "ขอบคุณที่ช่วยแชร์นะครับ ขอให้เฮงๆ ปังๆ เช่นกันครับ!", "กำลังใจดีๆ แบบนี้ พ่อค้าสู้ตายเลยครับ ขอบคุณครับ! 🙏✨", "อุ๊ย เขินเลย! ขอบคุณสำหรับคำชมและหัวใจนะครับ"] },
-            { "category": "Question", "keywords": ["?", "ไหม", "มั้ย", "อะไร", "ทำไม", "เมื่อไหร่", "ยังไง", "แบบไหน", "ได้ไหม", "เปล่า", "ใช่ไหม", "หรอ", "เหรอ", "สอบถาม", "ถามหน่อย", "คุยด้วยได้ไหม"], "replies": ["คำถามดีมากครับ! เดี๋ยวแอดมินมาตอบให้แบบละเอียดนะ รอสักครู่จ้า 🙏", "เดี๋ยวตอบให้นะครับคุณ @username ขอไล่ตอบตามคิวสักครู่นะ", "สงสัยตรงไหนถามทิ้งไว้ได้เลยครับ เดี๋ยวผมมาสรุปให้ฟังทีเดียวครับ", "รอสักครู่นะครับ เดี๋ยวแอดมินจัดการคำถามให้จ้า"] }
+            { "category": "Question", "keywords": ["?", "ไหม", "มั้ย", "อะไร", "ทำไม", "เมื่อไหร่", "ยังไง", "แบบไหน", "ได้ไหม", "เปล่า", "ใช่ไหม", "หรอ", "เหรอ", "สอบถาม", "ถามหน่อย", "คุยด้วยได้ไหม"], "replies": ["คำถามดีมากครับ! เดี๋ยวแอดมินมาตอบให้แบบละเอียดนะ รอสักครู่จ้า 🙏", "เดี๋ยวตอบให้นะครับคุณ {username} ขอไล่ตอบตามคิวสักครู่นะ", "สงสัยตรงไหนถามทิ้งไว้ได้เลยครับ เดี๋ยวผมมาสรุปให้ฟังทีเดียวครับ", "รอสักครู่นะครับ เดี๋ยวแอดมินจัดการคำถามให้จ้า"] },
+            { "category": "Product Codes (Regex)", "keywords": ["[A-Z]{1,2}\\d{2,4}", "#\\d{3,}"], "replies": ["พบคิวรหัสสินค้า {keyword}! เช็คสต็อกให้สักครู่นะครับคุณ {username} 📦", "รหัส {keyword} ยังมีของครับ! กดสั่งในตะกร้าได้เลยครับ ✨"], "useRegex": true }
         ];
 
         this.rules = defaultRules;
@@ -142,15 +145,21 @@ export class MockRulesEditor {
                                 ${kwCount} keywords | ${repCount} replies
                             </span>
                         </div>
-                        <button class="delete-rule-btn" data-index="${index}" style="
-                            background: rgba(255, 68, 68, 0.1); 
-                            color: #ff4444; 
-                            border: none; 
-                            padding: 5px 10px; 
-                            border-radius: 6px; 
-                            cursor: pointer;
-                            font-size: 12px;
-                        ">🗑️ ลบหมวดหมู่</button>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: var(--text-primary);">
+                                <input type="checkbox" class="rule-regex" ${rule.useRegex ? 'checked' : ''} style="width: 16px; height: 16px;">
+                                <span>Regex</span>
+                            </label>
+                            <button class="delete-rule-btn" data-index="${index}" style="
+                                background: rgba(255, 68, 68, 0.1); 
+                                color: #ff4444; 
+                                border: none; 
+                                padding: 5px 10px; 
+                                border-radius: 6px; 
+                                cursor: pointer;
+                                font-size: 12px;
+                            ">🗑️ ลบ</button>
+                        </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -224,13 +233,14 @@ export class MockRulesEditor {
                 .split(',')
                 .map(k => k.trim())
                 .filter(k => k);
+            const useRegex = card.querySelector('.rule-regex').checked;
             const replies = card.querySelector('.rule-replies').value
                 .split('\n')
                 .map(r => r.trim())
                 .filter(r => r);
 
             if (category) {
-                newRules.push({ category, keywords, replies });
+                newRules.push({ category, keywords, replies, useRegex });
             }
         });
         

@@ -273,6 +273,10 @@ export class WebhookManager {
                                     <input type="checkbox" class="webhook-trigger" value="keywords" style="width: 16px; height: 16px; cursor: pointer;">
                                     <span>🔑 มีคำสำคัญ (ตาม Keyword Alert)</span>
                                 </label>
+                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                    <input type="checkbox" class="webhook-trigger" value="vip" style="width: 16px; height: 16px; cursor: pointer;">
+                                    <span>⭐ คอมเมนต์จาก VIP</span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -600,7 +604,8 @@ export class WebhookManager {
                                 const labels = {
                                     all: '💬 ทั้งหมด',
                                     questions: '❓ คำถาม',
-                                    keywords: '🔑 คำสำคัญ'
+                                    keywords: '🔑 คำสำคัญ',
+                                    vip: '⭐ VIP'
                                 };
                                 return `<span style="background: ${color}20; color: ${color}; padding: 3px 10px; border-radius: 12px; font-size: 12px;">${labels[t]}</span>`;
                             }).join('')}

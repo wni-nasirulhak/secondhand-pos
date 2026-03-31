@@ -5,8 +5,9 @@ export class CommentList {
         this.comments = [];
         this.filteredComments = [];
         this.searchQuery = '';
-        this.filterType = 'all'; // all, questions
+        this.filterType = 'all'; // all, questions, vip
         this.sortBy = 'newest'; // newest, oldest
+        this.vipUsers = [];
         this.render();
     }
 
@@ -15,11 +16,14 @@ export class CommentList {
             <div class="comment-list">
                 <div class="comment-header">
                     <h2>💬 คอมเมนต์ที่ดึงได้</h2>
-                    <div class="comment-stats">
+                    <div class="comment-stats" style="display: flex; gap: 10px; align-items: center;">
                         <span class="stat">
                             <span class="stat-icon">📊</span>
                             <span id="comment-count">0</span> คอมเมนต์
                         </span>
+                        <button id="btn-export-excel-active" class="btn btn-small" style="background: #207245; display: none;">
+                            <i class="fas fa-file-excel"></i> XLSX
+                        </button>
                     </div>
                 </div>
                 
@@ -63,6 +67,7 @@ export class CommentList {
                         ">
                             <option value="all">📋 ทั้งหมด</option>
                             <option value="questions">❓ เฉพาะคำถาม</option>
+                            <option value="vip">⭐ เฉพาะ VIP</option>
                         </select>
                         
                         <select id="sort-by" style="
@@ -151,6 +156,18 @@ export class CommentList {
                 this.clearFilters();
             });
         }
+
+        // Export active session Excel
+        const exportActiveBtn = this.container.querySelector('#btn-export-excel-active');
+        if (exportActiveBtn) {
+            exportActiveBtn.addEventListener('click', () => {
+                if (window.app && window.app.activeSessionId) {
+                    window.open(`/api/export/${window.app.activeSessionId}`, '_blank');
+                } else {
+                    alert('❌ ไม่พบเซสชันที่กำลังทำงาน');
+                }
+            });
+        }
     }
     
     clearFilters() {
@@ -170,6 +187,7 @@ export class CommentList {
     }
     
     isQuestion(comment) {
+        if (!comment) return false;
         const text = comment.toLowerCase();
         const thaiQuestions = ['ไหม', 'หรือ', 'อะไร', 'ทำไม', 'เมื่อไหร่', 'ที่ไหน', 'ยังไง', 'คือ', 'มั้ย', 'หรอ', 'เหรอ', 'ไร'];
         const englishQuestions = ['what', 'why', 'how', 'when', 'where', 'who', 'which', 'can', 'could', 'would', 'should'];
@@ -182,7 +200,22 @@ export class CommentList {
         
         return false;
     }
-    
+
+    isVip(username) {
+        if (!username || !this.vipUsers || this.vipUsers.length === 0) return false;
+        const cleanName = username.trim().toLowerCase().replace(/^@/, '');
+        return this.vipUsers.some(vip => vip.trim().toLowerCase().replace(/^@/, '') === cleanName);
+    }
+
+    setVipUsers(users) {
+        if (typeof users === 'string') {
+            this.vipUsers = users.split(',').map(u => u.trim()).filter(u => u);
+        } else if (Array.isArray(users)) {
+            this.vipUsers = users;
+        }
+        this.applyFilters();
+    }
+
     applyFilters() {
         let filtered = [...this.comments];
         
@@ -197,6 +230,8 @@ export class CommentList {
         // Apply filter type
         if (this.filterType === 'questions') {
             filtered = filtered.filter(c => this.isQuestion(c.comment));
+        } else if (this.filterType === 'vip') {
+            filtered = filtered.filter(c => this.isVip(c.username));
         }
         
         // Apply sort
@@ -258,6 +293,11 @@ export class CommentList {
             countEl.textContent = this.comments.length;
         }
 
+        const exportBtn = this.container.querySelector('#btn-export-excel-active');
+        if (exportBtn) {
+            exportBtn.style.display = this.comments.length > 0 ? 'inline-flex' : 'none';
+        }
+
         if (this.filteredComments.length === 0 && this.comments.length === 0) {
             // No comments at all
             container.innerHTML = `
@@ -280,31 +320,45 @@ export class CommentList {
             // Show filtered comments
             container.innerHTML = this.filteredComments.map((comment, index) => {
                 const isQuestionComment = this.isQuestion(comment.comment);
+                const isVipComment = this.isVip(comment.username);
                 const highlightedUsername = this.highlightText(comment.username, this.searchQuery);
                 const highlightedComment = this.highlightText(comment.comment, this.searchQuery);
                 
+                // VIP Design: Golden border-left + slight glow
+                let itemStyle = `
+                    background: var(--bg-secondary);
+                    border: 1px solid var(--border-color);
+                    border-radius: 12px;
+                    padding: 15px;
+                    margin-bottom: 12px;
+                    transition: all 0.3s;
+                `;
+
+                if (isVipComment) {
+                    itemStyle += `
+                        border-left: 4px solid #f1c40f;
+                        background: linear-gradient(90deg, rgba(241, 196, 15, 0.05) 0%, var(--bg-secondary) 30%);
+                        box-shadow: 0 4px 15px rgba(241, 196, 15, 0.1);
+                    `;
+                } else if (isQuestionComment) {
+                    itemStyle += `border-left: 3px solid #f39c12;`;
+                }
+
                 return `
-                    <div class="comment-item" style="
-                        background: var(--bg-secondary);
-                        border: 1px solid var(--border-color);
-                        border-radius: 12px;
-                        padding: 15px;
-                        margin-bottom: 12px;
-                        transition: all 0.3s;
-                        ${isQuestionComment ? 'border-left: 3px solid #f39c12;' : ''}
-                    " onmouseover="this.style.borderColor='var(--accent-primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                    <div class="comment-item" style="${itemStyle}" onmouseover="this.style.borderColor='var(--accent-primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
                         <div class="comment-header" style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <strong class="comment-username" style="color: var(--accent-primary); font-size: 15px;">
-                                    ${highlightedUsername}
+                                <strong class="comment-username" style="color: ${isVipComment ? '#f1c40f' : 'var(--accent-primary)'}; font-size: 15px;">
+                                    ${isVipComment ? '👑 ' : ''}${highlightedUsername}
                                 </strong>
+                                ${isVipComment ? '<span style="background: #f1c40f; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">VIP</span>' : ''}
                                 ${isQuestionComment ? '<span style="background: #f39c12; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">❓ คำถาม</span>' : ''}
                             </div>
                             <span class="comment-time" style="color: var(--text-secondary); font-size: 12px;">
                                 ${this.formatTime(comment.timestamp)}
                             </span>
                         </div>
-                        <div class="comment-text" style="color: var(--text-primary); line-height: 1.5;">
+                        <div class="comment-text" style="color: var(--text-primary); line-height: 1.5; ${isVipComment ? 'font-weight: 500;' : ''}">
                             ${highlightedComment}
                         </div>
                     </div>
